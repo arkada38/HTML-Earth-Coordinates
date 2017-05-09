@@ -1,21 +1,51 @@
 var side, canvas, context, mouseX, mouseY, radius;
 
+var azimuthal, north, south;
+
 window.onload = function() {
-    canvas = document.getElementById('cv');
-	context = canvas.getContext('2d');
-	side = Math.min(window.innerWidth / 3, window.innerHeight);
-  
-	canvas.addEventListener('mousemove', function(evt) {
+    /*canvas.addEventListener('mousemove', function(evt) {
 		var mousePos = getMousePos(canvas, evt);
 		mouseX = mousePos.x;
 		mouseY = mousePos.y;
-	}, false);
+	}, false);*/
+
+	var size = window.innerWidth * 0.33 - 44;
+
+	azimuthal = {
+		canvas: document.getElementById('cv_azimuthal'),
+		context: document.getElementById('cv_azimuthal').getContext('2d'),
+		side: size,
+		radius: size / 2
+	}
+
+	north = {
+		canvas: document.getElementById('cv_north'),
+		context: document.getElementById('cv_north').getContext('2d'),
+		side: size,
+		radius: size / 2
+	}
+
+	south = {
+		canvas: document.getElementById('cv_south'),
+		context: document.getElementById('cv_south').getContext('2d'),
+		side: size,
+		radius: size / 2
+	}
 
 	draw();
 };
 
 window.onresize = function(event) {
-	side = Math.min(window.innerWidth / 3, window.innerHeight);
+	var size = window.innerWidth * 0.33 - 44;
+
+	azimuthal.side = size;
+	north.side = size;
+	south.side = size;
+
+	azimuthal.radius = azimuthal.side / 2;
+	north.radius = north.side / 2;
+	south.radius = south.side / 2;
+
     draw();
 };
 
@@ -24,17 +54,18 @@ window.onmousemove = function(event) {
 };
 
 function draw() {
-	context.canvas.width  = 3 * side;
-	context.canvas.height = side;
-	
-	context.font = '20pt Calibri';
-    context.fillText(mouseX + 'x' + mouseY, 0, 20);
-	
-    var centerX = canvas.width / 2;
-    var centerY = canvas.height / 2;
-    radius = side / 2;
+	azimuthal.context.canvas.width = azimuthal.side;
+	azimuthal.context.canvas.height = azimuthal.side;
+
+	north.context.canvas.width = north.side;
+	north.context.canvas.height = north.side;
+
+	south.context.canvas.width = south.side;
+	south.context.canvas.height = south.side;
 
 	// Azimuthal equidistant
+		context = azimuthal.context;
+		radius = azimuthal.radius;
 		// Latitudes
 		for (var i = 1; i <= 18; i++) {
 			context.beginPath();
@@ -72,10 +103,12 @@ function draw() {
 		context.stroke();
 
 	// North pole
+		context = north.context;
+		radius = north.radius;
 		// Latitudes
 		for (var i = 1; i <= 9; i++) {
 			context.beginPath();
-			context.arc(3 * radius, radius, radius * i / 9, 0, 2 * Math.PI, false);
+			context.arc(radius, radius, radius * i / 9, 0, 2 * Math.PI, false);
 			context.lineWidth = 1;
 			context.strokeStyle = '#003300';
 			context.stroke();
@@ -88,31 +121,33 @@ function draw() {
 			var x = t * Math.sqrt(radius ** 2 - t ** 2 / 4) / radius;
 			var y = Math.sqrt(t ** 2 - x ** 2);
 			context.beginPath();
-			context.moveTo(3 * radius + x, y);
-			t = 2 * radius / 9 * Math.cos(i / 360 * Math.PI);
-			x = t * Math.sqrt((radius / 9) ** 2 - t ** 2 / 4) / (radius / 9);
+			context.moveTo(radius + x, y);
+			t = radius / 9 * Math.cos(i / 360 * Math.PI);
+			x = t * Math.sqrt((radius / 18) ** 2 - t ** 2 / 4) / (radius / 18);
 			y = Math.sqrt(t ** 2 - x ** 2);
-			context.lineTo(3 * radius + x, radius * 8 / 9 + y);
+			context.lineTo(radius + x, radius * 17 / 18 + y);
 			context.stroke();
 		}
 		
 		// Vertical of cross
 		context.beginPath();
-		context.moveTo(3 * radius, radius * 8 / 9);
-		context.lineTo(3 * radius, radius * 10 / 9);
+		context.moveTo(radius, radius * 8 / 9);
+		context.lineTo(radius, radius * 10 / 9);
 		context.stroke();
 		
 		// Horisontal of cross
 		context.beginPath();
-		context.moveTo(2 * radius + radius * 8 / 9, radius);
-		context.lineTo(2 * radius + radius * 10 / 9, radius);
+		context.moveTo(radius * 8 / 9, radius);
+		context.lineTo(radius * 10 / 9, radius);
 		context.stroke();
 
 	// South pole
+		context = south.context;
+		radius = south.radius;
 		// Latitudes
 		for (var i = 1; i <= 9; i++) {
 			context.beginPath();
-			context.arc(5 * radius, radius, radius * i / 9, 0, 2 * Math.PI, false);
+			context.arc(radius, radius, radius * i / 9, 0, 2 * Math.PI, false);
 			context.lineWidth = 1;
 			context.strokeStyle = '#003300';
 			context.stroke();
@@ -125,24 +160,24 @@ function draw() {
 			var x = t * Math.sqrt(radius ** 2 - t ** 2 / 4) / radius;
 			var y = Math.sqrt(t ** 2 - x ** 2);
 			context.beginPath();
-			context.moveTo(5 * radius + x, y);
-			t = 2 * radius / 9 * Math.cos(i / 360 * Math.PI);
-			x = t * Math.sqrt((radius / 9) ** 2 - t ** 2 / 4) / (radius / 9);
+			context.moveTo(radius + x, y);
+			t = radius / 9 * Math.cos(i / 360 * Math.PI);
+			x = t * Math.sqrt((radius / 18) ** 2 - t ** 2 / 4) / (radius / 18);
 			y = Math.sqrt(t ** 2 - x ** 2);
-			context.lineTo(5 * radius + x, radius * 8 / 9 + y);
+			context.lineTo(radius + x, radius * 17 / 18 + y);
 			context.stroke();
 		}
 		
 		// Vertical of cross
 		context.beginPath();
-		context.moveTo(5 * radius, radius * 8 / 9);
-		context.lineTo(5 * radius, radius * 10 / 9);
+		context.moveTo(radius, radius * 8 / 9);
+		context.lineTo(radius, radius * 10 / 9);
 		context.stroke();
 		
 		// Horisontal of cross
 		context.beginPath();
-		context.moveTo(4 * radius + radius * 8 / 9, radius);
-		context.lineTo(4 * radius + radius * 10 / 9, radius);
+		context.moveTo(radius * 8 / 9, radius);
+		context.lineTo(radius * 10 / 9, radius);
 		context.stroke();
 	
 	drawPoint(80, -150, 'red');
@@ -186,6 +221,10 @@ function drawPoint(latitude, longitude, colour) {
 		y = 0;
 	}
 	
+	// Azimuthal equidistant
+	context = azimuthal.context;
+	radius = azimuthal.radius;
+
 	context.beginPath();
 	context.arc(radius + x, y + radius - k, 3, 0, 2 * Math.PI, false);
 	context.lineWidth = 3;
@@ -195,6 +234,9 @@ function drawPoint(latitude, longitude, colour) {
 	
 	if (0 <= latitude && latitude <= 90) {
 		// North pole
+		context = north.context;
+		radius = north.radius;
+		
 		k = radius * (1 - (latitude / 90));
 		t = 2 * k * Math.cos((longitude + 90) / 360 * Math.PI);
 		x = t * Math.sqrt(k ** 2 - t ** 2 / 4) / k;
@@ -206,7 +248,7 @@ function drawPoint(latitude, longitude, colour) {
 		}
 		
 		context.beginPath();
-		context.arc(3 * radius + x, y + radius - k, 3, 0, 2 * Math.PI, false);
+		context.arc(radius + x, y + radius - k, 3, 0, 2 * Math.PI, false);
 		context.lineWidth = 1;
 		context.strokeStyle = colour;
 		context.stroke();
@@ -215,6 +257,9 @@ function drawPoint(latitude, longitude, colour) {
 	
 	if (-90 <= latitude && latitude <= 0) {
 		// South pole
+		context = south.context;
+		radius = south.radius;
+
 		k = radius * (1 + (latitude / 90));
 		t = 2 * k * Math.sin((longitude - 90) / 360 * Math.PI);
 		x = t * Math.sqrt(k ** 2 - t ** 2 / 4) / k;
@@ -226,7 +271,7 @@ function drawPoint(latitude, longitude, colour) {
 		}
 		
 		context.beginPath();
-		context.arc(5 * radius + x, y + radius - k, 3, 0, 2 * Math.PI, false);
+		context.arc(radius + x, y + radius - k, 3, 0, 2 * Math.PI, false);
 		context.lineWidth = 1;
 		context.strokeStyle = colour;
 		context.stroke();
