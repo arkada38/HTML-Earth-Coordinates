@@ -1,3 +1,6 @@
+//Longitude is a geographic coordinate that specifies the east-west position of a point on the Earth's surface.
+//Latitude is a geographic coordinate that specifies the north–south position of a point on the Earth's surface.
+
 var side, canvas, context, mouseX, mouseY, radius, canvasMargin;
 
 var azimuthal, north, south;
@@ -54,6 +57,44 @@ window.onmousemove = function(event) {
     draw();
 };
 
+function drawGrid(context, radius, steps) {
+	// Latitudes
+	for (var i = 1; i <= steps; i++) {
+		context.beginPath();
+		context.arc(radius + canvasMargin, radius + canvasMargin, radius * i / steps, 0, 2 * Math.PI, false);
+		context.lineWidth = 1;
+		context.strokeStyle = '#003300';
+		context.stroke();
+		context.closePath();
+	}
+
+	// Longitudes
+	for (var i = 0; i < 360; i += 10) {
+		var t = 2 * radius * Math.cos(i / 360 * Math.PI);
+		var x = t * Math.sqrt(radius ** 2 - t ** 2 / 4) / radius;
+		var y = Math.sqrt(t ** 2 - x ** 2);
+		context.beginPath();
+		context.moveTo(radius + x + canvasMargin, y + canvasMargin);
+		t = 2 * radius / steps * Math.cos(i / 360 * Math.PI);
+		x = t * Math.sqrt((radius / steps) ** 2 - t ** 2 / 4) / (radius / steps);
+		y = Math.sqrt(t ** 2 - x ** 2);
+		context.lineTo(radius + x + canvasMargin, radius * (steps - 1) / steps + y + canvasMargin);
+		context.stroke();
+	}
+
+	// Vertical of cross
+	context.beginPath();
+	context.moveTo(radius + canvasMargin, radius * (steps - 1) / steps + canvasMargin);
+	context.lineTo(radius + canvasMargin, radius * (steps + 1) / steps + canvasMargin);
+	context.stroke();
+
+	// Horisontal of cross
+	context.beginPath();
+	context.moveTo(radius * (steps - 1) / steps + canvasMargin, radius + 3);
+	context.lineTo(radius * (steps + 1) / steps + canvasMargin, radius + canvasMargin);
+	context.stroke();
+}
+
 function draw() {
 	azimuthal.context.canvas.width = azimuthal.side;
 	azimuthal.context.canvas.height = azimuthal.side;
@@ -65,126 +106,16 @@ function draw() {
 	south.context.canvas.height = south.side;
 
 	// Azimuthal equidistant
-		context = azimuthal.context;
-		radius = azimuthal.radius - canvasMargin;
-		// Latitudes
-		for (var i = 1; i <= 18; i++) {
-			context.beginPath();
-			context.arc(radius + canvasMargin, radius + canvasMargin, radius * i / 18, 0, 2 * Math.PI, false);
-			context.lineWidth = 1;
-			context.strokeStyle = '#003300';
-			context.stroke();
-			context.closePath();
-		}
-		
-		// Longitudes
-		for (var i = 0; i < 360; i += 10) {
-			var t = 2 * radius * Math.cos(i / 360 * Math.PI);
-			var x = t * Math.sqrt(radius ** 2 - t ** 2 / 4) / radius;
-			var y = Math.sqrt(t ** 2 - x ** 2);
-			context.beginPath();
-			context.moveTo(radius + x + canvasMargin, y + canvasMargin);
-			t = radius / 9 * Math.cos(i / 360 * Math.PI);
-			x = t * Math.sqrt((radius / 18) ** 2 - t ** 2 / 4) / (radius / 18);
-			y = Math.sqrt(t ** 2 - x ** 2);
-			context.lineTo(radius + x + canvasMargin, radius * 17 / 18 + y + canvasMargin);
-			context.stroke();
-		}
-		
-		// Vertical of cross
-		context.beginPath();
-		context.moveTo(radius + canvasMargin, radius * 17 / 18 + canvasMargin);
-		context.lineTo(radius + canvasMargin, radius * 19 / 18 + canvasMargin);
-		context.stroke();
-		
-		// Horisontal of cross
-		context.beginPath();
-		context.moveTo(radius * 17 / 18 + canvasMargin, radius + 3);
-		context.lineTo(radius * 19 / 18 + canvasMargin, radius + canvasMargin);
-		context.stroke();
-
+	drawGrid(azimuthal.context, azimuthal.radius - canvasMargin, 18);
 	// North pole
-		context = north.context;
-		radius = north.radius - canvasMargin;
-		// Latitudes
-		for (var i = 1; i <= 9; i++) {
-			context.beginPath();
-			context.arc(radius + canvasMargin, radius + canvasMargin, radius * i / 9, 0, 2 * Math.PI, false);
-			context.lineWidth = 1;
-			context.strokeStyle = '#003300';
-			context.stroke();
-			context.closePath();
-		}
-		
-		// Longitudes
-		for (var i = 0; i < 360; i += 10) {
-			var t = 2 * radius * Math.cos(i / 360 * Math.PI);
-			var x = t * Math.sqrt(radius ** 2 - t ** 2 / 4) / radius;
-			var y = Math.sqrt(t ** 2 - x ** 2);
-			context.beginPath();
-			context.moveTo(radius + x + canvasMargin, y + canvasMargin);
-			t = radius / 9 * Math.cos(i / 360 * Math.PI);
-			x = t * Math.sqrt((radius / 18) ** 2 - t ** 2 / 4) / (radius / 18);
-			y = Math.sqrt(t ** 2 - x ** 2);
-			context.lineTo(radius + x + canvasMargin, radius * 17 / 18 + y + canvasMargin);
-			context.stroke();
-		}
-		
-		// Vertical of cross
-		context.beginPath();
-		context.moveTo(radius + canvasMargin, radius * 8 / 9 + canvasMargin);
-		context.lineTo(radius + canvasMargin, radius * 10 / 9 + canvasMargin);
-		context.stroke();
-		
-		// Horisontal of cross
-		context.beginPath();
-		context.moveTo(radius * 8 / 9 + canvasMargin, radius + canvasMargin);
-		context.lineTo(radius * 10 / 9 + canvasMargin, radius + canvasMargin);
-		context.stroke();
-
+	drawGrid(north.context, north.radius - canvasMargin, 9);
 	// South pole
-		context = south.context;
-		radius = south.radius - canvasMargin;
-		// Latitudes
-		for (var i = 1; i <= 9; i++) {
-			context.beginPath();
-			context.arc(radius + canvasMargin, radius + canvasMargin, radius * i / 9, 0, 2 * Math.PI, false);
-			context.lineWidth = 1;
-			context.strokeStyle = '#003300';
-			context.stroke();
-			context.closePath();
-		}
-		
-		// Longitudes
-		for (var i = 0; i < 360; i += 10) {
-			var t = 2 * radius * Math.cos(i / 360 * Math.PI);
-			var x = t * Math.sqrt(radius ** 2 - t ** 2 / 4) / radius;
-			var y = Math.sqrt(t ** 2 - x ** 2);
-			context.beginPath();
-			context.moveTo(radius + x + canvasMargin, y + canvasMargin);
-			t = radius / 9 * Math.cos(i / 360 * Math.PI);
-			x = t * Math.sqrt((radius / 18) ** 2 - t ** 2 / 4) / (radius / 18);
-			y = Math.sqrt(t ** 2 - x ** 2);
-			context.lineTo(radius + x + canvasMargin, radius * 17 / 18 + y + canvasMargin);
-			context.stroke();
-		}
-		
-		// Vertical of cross
-		context.beginPath();
-		context.moveTo(radius + canvasMargin, radius * 8 / 9 + canvasMargin);
-		context.lineTo(radius + canvasMargin, radius * 10 / 9 + canvasMargin);
-		context.stroke();
-		
-		// Horisontal of cross
-		context.beginPath();
-		context.moveTo(radius * 8 / 9 + canvasMargin, radius + canvasMargin);
-		context.lineTo(radius * 10 / 9 + canvasMargin, radius + canvasMargin);
-		context.stroke();
+	drawGrid(south.context, south.radius - canvasMargin, 9);
 	
-	drawPoint(80, -150, 'red');
-	drawPoint(80, +150, 'green');
-	drawPoint(60, -20, 'red');
-	drawPoint(60, +20, 'green');
+	/*drawPoint(80, -150, 'red');
+	drawPoint(80, +150, 'green');*/
+	drawPoint(60, 40, 'red');
+	/*drawPoint(60, +20, 'green');
 	drawPoint(40, -80, 'red');
 	drawPoint(40, +80, 'green');
 	drawPoint(20, -100, 'red');
@@ -201,11 +132,15 @@ function draw() {
 	drawPoint(-20, -100, 'purple');
 	drawPoint(-20, +100, 'lime');
 	drawPoint(+90, 0, 'gold');
-	drawPoint(-90, 0, 'brown');
+	drawPoint(-90, 0, 'brown');*/
 }
 
 function drawPoint(latitude, longitude, colour) {
 	var k, t, x, y;
+	/*
+	k - расстояние от полюса к координате
+	t - хорда
+	*/
 	
 	latitude = Math.min(Math.max(-90, latitude), 90);
 	longitude = Math.min(Math.max(-180, longitude), 180);
