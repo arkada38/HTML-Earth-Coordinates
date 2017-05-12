@@ -169,6 +169,36 @@ function drawHemisphereGrid(map) {
 	context.stroke();
 	context.closePath();
 
+	// Longitudes (дуги)
+	for (let i = 1; i < steps / 2; i++) {
+		// Длина хорды (расстояние между полюсами)
+		let t = 2 * radius;
+		// Высота сегмента
+		let hs = t * i / steps;
+		// Радиус окружности, дающей дугу
+		let r = hs / 2 + t ** 2 / 8 / hs;
+		// Высота равнобедренного треугольника
+		// Расстояние до центра окружности
+		let h = Math.sqrt(r ** 2 - t ** 2 / 4)
+
+		let alfa = Math.asin(t * (azimuthal.steps - 2) / azimuthal.steps / 2 / r);
+
+		// Левая часть
+		context.beginPath();
+		context.arc(radius + canvasMargin + h, radius + canvasMargin,
+			r, Math.PI - alfa, Math.PI + alfa, false);
+		context.stroke();
+		context.closePath();
+
+		// Правая часть
+		context.beginPath();
+		context.arc(radius + canvasMargin - h, radius + canvasMargin,
+			r, 2 * Math.PI - alfa, 2 * Math.PI + alfa, false);
+		context.stroke();
+		context.closePath();
+	}
+
+	steps = azimuthal.steps;
 	// Latitudes (горизонтальные линии)
 	for (let i = 1; i < steps; i++) {
 		// Высота сегмента
@@ -181,31 +211,6 @@ function drawHemisphereGrid(map) {
 		context.moveTo(canvasMargin + radius - t / 2, h + canvasMargin);
 		context.lineTo(canvasMargin + radius + t / 2, h + canvasMargin);
 
-		context.lineWidth = 1;
-		context.strokeStyle = '#003300';
-		context.stroke();
-		context.closePath();
-	}
-
-	// Longitudes (дуги)
-	for (let i = 1; i < steps; i++) {
-		context.beginPath();
-
-		// Длина хорды (расстояние между полюсами)
-		let t = 2 * radius;
-		// Высота сегмента
-		let hs = t * i / steps;
-		if (i / steps > .5) hs = t * (i / steps - .5);
-		// Радиус окружности, дающей дугу
-		let r = hs / 2 + t ** 2 / 8 / hs;
-		// Высота равнобедренного треугольника
-		// Расстояние до центра окружности
-		let h = Math.sqrt(r ** 2 - t ** 2 / 4)
-		if (i / steps > .5) h = -h;
-
-		context.arc(radius + canvasMargin + h, radius + canvasMargin,
-			r, 0, 2 * Math.PI, false);
-		
 		context.lineWidth = 1;
 		context.strokeStyle = '#003300';
 		context.stroke();
