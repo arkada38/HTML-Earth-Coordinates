@@ -3,7 +3,7 @@
 
 var side, canvas, context, mouseX, mouseY, radius, canvasMargin;
 
-let azimuthal, north, south;
+let azimuthal, north, south, west, east;
 
 window.onload = function() {
     var size = window.innerWidth * 0.33 - 44;
@@ -13,38 +13,57 @@ window.onload = function() {
 		canvas: document.getElementById('cv_azimuthal'),
 		context: document.getElementById('cv_azimuthal').getContext('2d'),
 		side: size,
-		radius: size / 2 - canvasMargin
+		radius: size / 2 - canvasMargin,
+		steps: 18
 	}
 
 	north = {
 		canvas: document.getElementById('cv_north'),
 		context: document.getElementById('cv_north').getContext('2d'),
 		side: size,
-		radius: size / 2 - canvasMargin
+		radius: size / 2 - canvasMargin,
+		steps: 9
 	}
 
 	south = {
 		canvas: document.getElementById('cv_south'),
 		context: document.getElementById('cv_south').getContext('2d'),
 		side: size,
-		radius: size / 2 - canvasMargin
+		radius: size / 2 - canvasMargin,
+		steps: 9
 	}
 
-	azimuthal.canvas.addEventListener('click', function(evt) {
+	west = {
+		canvas: document.getElementById('cv_west'),
+		context: document.getElementById('cv_west').getContext('2d'),
+		side: size,
+		radius: size / 2 - canvasMargin,
+		steps: 12
+	}
+
+	east = {
+		canvas: document.getElementById('cv_east'),
+		context: document.getElementById('cv_east').getContext('2d'),
+		side: size,
+		radius: size / 2 - canvasMargin,
+		steps: 12
+	}
+
+	azimuthal.canvas.addEventListener('mousemove', function(evt) {
 		let mousePos = getMousePos(azimuthal.canvas, evt);
 		let coordinates = getCoordinates(azimuthal, mousePos);
 		draw();
 		drawPoint(coordinates.latitude, coordinates.longitude, "orange");
 	}, false);
 
-	north.canvas.addEventListener('click', function(evt) {
+	north.canvas.addEventListener('mousemove', function(evt) {
 		let mousePos = getMousePos(north.canvas, evt);
 		let coordinates = getCoordinates(north, mousePos);
 		draw();
 		drawPoint(coordinates.latitude, coordinates.longitude, "orange");
 	}, false);
 
-	south.canvas.addEventListener('click', function(evt) {
+	south.canvas.addEventListener('mousemove', function(evt) {
 		let mousePos = getMousePos(south.canvas, evt);
 		let coordinates = getCoordinates(south, mousePos);
 		draw();
@@ -60,10 +79,14 @@ window.onresize = function(event) {
 	azimuthal.side = size;
 	north.side = size;
 	south.side = size;
+	west.side = size;
+	east.side = size;
 
 	azimuthal.radius = azimuthal.side / 2 - canvasMargin;
 	north.radius = north.side / 2 - canvasMargin;
 	south.radius = south.side / 2 - canvasMargin;
+	west.radius = west.side / 2 - canvasMargin;
+	east.radius = east.side / 2 - canvasMargin;
 
     draw();
 };
@@ -72,9 +95,13 @@ window.onmousemove = function(event) {
     //draw();
 };
 
-function drawGrid(context, radius, steps) {
+function drawPoleGrid(map) {
+	let context = map.context;
+	let radius = map.radius - canvasMargin;
+	let steps = map.steps;
+
 	// Latitudes (окружности)
-	for (var i = 1; i <= steps; i++) {
+	for (let i = 1; i <= steps; i++) {
 		context.beginPath();
 		context.arc(radius + canvasMargin, radius + canvasMargin,
 			radius * i / steps, 0, 2 * Math.PI, false);
@@ -122,6 +149,70 @@ function drawGrid(context, radius, steps) {
 	context.stroke();
 }
 
+function drawHemisphereGrid(map) {
+	let context = map.context;
+	let radius = map.radius - canvasMargin;
+	let steps = map.steps;
+
+	context.beginPath();
+
+	// Окружность сферы
+	context.arc(radius + canvasMargin, radius + canvasMargin,
+		radius, 0, 2 * Math.PI, false);
+	context.lineWidth = 1;
+	context.strokeStyle = '#003300';
+
+	// Вертикаль
+	context.moveTo(radius + canvasMargin, canvasMargin);
+	context.lineTo(radius + canvasMargin, 2 * radius + canvasMargin);
+
+	context.stroke();
+	context.closePath();
+
+	// Latitudes (горизонтальные линии)
+	for (let i = 1; i < steps; i++) {
+		// Высота сегмента
+		let h = 2 * radius * i / steps;
+		// Длина хорды
+		t = Math.sqrt(h * (8 * radius - 4 * h));
+
+		context.beginPath();
+
+		context.moveTo(canvasMargin + radius - t / 2, h + canvasMargin);
+		context.lineTo(canvasMargin + radius + t / 2, h + canvasMargin);
+
+		context.lineWidth = 1;
+		context.strokeStyle = '#003300';
+		context.stroke();
+		context.closePath();
+	}
+
+	// Longitudes (дуги)
+	for (let i = 1; i < steps; i++) {
+		context.beginPath();
+
+		// Длина хорды (расстояние между полюсами)
+		let t = 2 * radius;
+		// Высота сегмента
+		let hs = t * i / steps;
+		if (i / steps > .5) hs = t * (i / steps - .5);
+		// Радиус окружности, дающей дугу
+		let r = hs / 2 + t ** 2 / 8 / hs;
+		// Высота равнобедренного треугольника
+		// Расстояние до центра окружности
+		let h = Math.sqrt(r ** 2 - t ** 2 / 4)
+		if (i / steps > .5) h = -h;
+
+		context.arc(radius + canvasMargin + h, radius + canvasMargin,
+			r, 0, 2 * Math.PI, false);
+		
+		context.lineWidth = 1;
+		context.strokeStyle = '#003300';
+		context.stroke();
+		context.closePath();
+	}
+}
+
 function draw() {
 	azimuthal.context.canvas.width = azimuthal.side;
 	azimuthal.context.canvas.height = azimuthal.side;
@@ -132,12 +223,22 @@ function draw() {
 	south.context.canvas.width = south.side;
 	south.context.canvas.height = south.side;
 
+	west.context.canvas.width = west.side;
+	west.context.canvas.height = west.side;
+
+	east.context.canvas.width = east.side;
+	east.context.canvas.height = east.side;
+
 	// Azimuthal equidistant
-	drawGrid(azimuthal.context, azimuthal.radius - canvasMargin, 18);
+	drawPoleGrid(azimuthal);
 	// North pole
-	drawGrid(north.context, north.radius - canvasMargin, 9);
+	drawPoleGrid(north);
 	// South pole
-	drawGrid(south.context, south.radius - canvasMargin, 9);
+	drawPoleGrid(south);
+	// West hemisphere
+	drawHemisphereGrid(west);
+	// East hemisphere
+	drawHemisphereGrid(east);
 	
 	drawPoint(80, -150, 'red');
 	drawPoint(80, +150, 'green');
