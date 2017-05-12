@@ -3,7 +3,7 @@
 
 var side, canvas, context, mouseX, mouseY, radius, canvasMargin;
 
-var azimuthal, north, south;
+let azimuthal, north, south;
 
 window.onload = function() {
     var size = window.innerWidth * 0.33 - 44;
@@ -30,11 +30,25 @@ window.onload = function() {
 		radius: size / 2 - canvasMargin
 	}
 
+	azimuthal.canvas.addEventListener('click', function(evt) {
+		let mousePos = getMousePos(azimuthal.canvas, evt);
+		let coordinates = getCoordinates(azimuthal, mousePos);
+		draw();
+		drawPoint(coordinates.latitude, coordinates.longitude, "orange");
+	}, false);
+
 	north.canvas.addEventListener('click', function(evt) {
 		let mousePos = getMousePos(north.canvas, evt);
-		mouseX = mousePos.x;
-		mouseY = mousePos.y;
-		console.log(getCoordinates(north, mousePos, 90));
+		let coordinates = getCoordinates(north, mousePos);
+		draw();
+		drawPoint(coordinates.latitude, coordinates.longitude, "orange");
+	}, false);
+
+	south.canvas.addEventListener('click', function(evt) {
+		let mousePos = getMousePos(south.canvas, evt);
+		let coordinates = getCoordinates(south, mousePos);
+		draw();
+		drawPoint(coordinates.latitude, coordinates.longitude, "orange");
 	}, false);
 
 	draw();
@@ -55,7 +69,7 @@ window.onresize = function(event) {
 };
 
 window.onmousemove = function(event) {
-    draw();
+    //draw();
 };
 
 function drawGrid(context, radius, steps) {
@@ -125,10 +139,10 @@ function draw() {
 	// South pole
 	drawGrid(south.context, south.radius - canvasMargin, 9);
 	
-	/*drawPoint(80, -150, 'red');
-	drawPoint(80, +150, 'green');*/
+	drawPoint(80, -150, 'red');
+	drawPoint(80, +150, 'green');
 	drawPoint(60, 40, 'red');
-	/*drawPoint(60, +20, 'green');
+	drawPoint(60, +20, 'green');
 	drawPoint(40, -80, 'red');
 	drawPoint(40, +80, 'green');
 	drawPoint(20, -100, 'red');
@@ -145,7 +159,7 @@ function draw() {
 	drawPoint(-20, -100, 'purple');
 	drawPoint(-20, +100, 'lime');
 	drawPoint(+90, 0, 'gold');
-	drawPoint(-90, 0, 'brown');*/
+	drawPoint(-90, 0, 'brown');
 }
 
 function drawPoint(latitude, longitude, colour) {
@@ -231,18 +245,43 @@ function drawPoint(latitude, longitude, colour) {
 	}
 }
 
-function getCoordinates(map, mousePos, maxLatitude) {
+function getCoordinates(map, mousePos) {
 	// Расстояние от центра по горизонтали
 	let x = mousePos.x - map.radius + canvasMargin;
 	// Расстояние от центра по вертикали
 	let y = mousePos.y - map.radius + canvasMargin;
-	
-	// Расстояние от центра до точки (широта)
-	let latitude = maxLatitude - Math.sqrt(x ** 2 + y ** 2) /
-		map.radius * maxLatitude;
 
-	let longitude = maxLatitude - Math.atan(x / -y) / Math.PI * 180;
-	if (y > 0) longitude = longitude - 180;
+	let latitude, longitude;
+	
+	if (map == north) {
+		// Расстояние от центра до точки (широта)
+		latitude = 90 - Math.sqrt(x ** 2 + y ** 2) /
+			map.radius * 90;
+
+		// Угол (долгота)
+		longitude = 90 - Math.atan(x / -y) / Math.PI * 180;
+		if (y > 0) longitude = longitude - 180;
+	}
+	
+	if (map == south) {
+		// Расстояние от центра до точки (широта)
+		latitude = -90 + Math.sqrt(x ** 2 + y ** 2) /
+			map.radius * 90;
+
+		// Угол (долгота)
+		longitude = 90 + Math.atan(x / -y) / Math.PI * 180;
+		if (y > 0) longitude = longitude - 180;
+	}
+	
+	if (map == azimuthal) {
+		// Расстояние от центра до точки (широта)
+		latitude = 90 - Math.sqrt(x ** 2 + y ** 2) /
+			map.radius * 180;
+
+		// Угол (долгота)
+		longitude = 90 - Math.atan(x / -y) / Math.PI * 180;
+		if (y > 0) longitude = longitude - 180;
+	}
 
 	return {
 		latitude: latitude,
