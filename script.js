@@ -6,13 +6,7 @@ var side, canvas, context, mouseX, mouseY, radius, canvasMargin;
 var azimuthal, north, south;
 
 window.onload = function() {
-    /*canvas.addEventListener('mousemove', function(evt) {
-		var mousePos = getMousePos(canvas, evt);
-		mouseX = mousePos.x;
-		mouseY = mousePos.y;
-	}, false);*/
-
-	var size = window.innerWidth * 0.33 - 44;
+    var size = window.innerWidth * 0.33 - 44;
 	canvasMargin = 2;
 
 	azimuthal = {
@@ -36,6 +30,13 @@ window.onload = function() {
 		radius: size / 2 - canvasMargin
 	}
 
+	north.canvas.addEventListener('click', function(evt) {
+		let mousePos = getMousePos(north.canvas, evt);
+		mouseX = mousePos.x;
+		mouseY = mousePos.y;
+		console.log(getCoordinates(north, mousePos, 90));
+	}, false);
+
 	draw();
 };
 
@@ -58,27 +59,39 @@ window.onmousemove = function(event) {
 };
 
 function drawGrid(context, radius, steps) {
-	// Latitudes
+	// Latitudes (окружности)
 	for (var i = 1; i <= steps; i++) {
 		context.beginPath();
-		context.arc(radius + canvasMargin, radius + canvasMargin, radius * i / steps, 0, 2 * Math.PI, false);
+		context.arc(radius + canvasMargin, radius + canvasMargin,
+			radius * i / steps, 0, 2 * Math.PI, false);
 		context.lineWidth = 1;
 		context.strokeStyle = '#003300';
 		context.stroke();
 		context.closePath();
 	}
 
-	// Longitudes
-	for (var i = 0; i < 360; i += 10) {
-		var t = 2 * radius * Math.cos(i / 360 * Math.PI);
-		var x = t * Math.sqrt(radius ** 2 - t ** 2 / 4) / radius;
-		var y = Math.sqrt(t ** 2 - x ** 2);
+	// Longitudes (линии)
+	for (let i = 0; i < 360; i += 10) {
+		// Хорда - растояние между вершинами линий по внешнему кругу
+		let t = 2 * radius * Math.cos(i / 360 * Math.PI);
+		// Величина отклонения вершины по горизонтали по внешнему кругу
+		let x = t * Math.sqrt(radius ** 2 - t ** 2 / 4) / radius;
+		// Величина отклонения вершины по вертикали по внешнему кругу
+		let y = Math.sqrt(t ** 2 - x ** 2);
+
 		context.beginPath();
 		context.moveTo(radius + x + canvasMargin, y + canvasMargin);
+
+		// Хорда - растояние между вершинами линий по внутреннему кругу
 		t = 2 * radius / steps * Math.cos(i / 360 * Math.PI);
-		x = t * Math.sqrt((radius / steps) ** 2 - t ** 2 / 4) / (radius / steps);
+		// Величина отклонения вершины по горизонтали по внутреннему кругу
+		x = t * Math.sqrt((radius / steps) ** 2 - t ** 2 / 4) /
+			(radius / steps);
+		// Величина отклонения вершины по вертикали по внутреннему кругу
 		y = Math.sqrt(t ** 2 - x ** 2);
-		context.lineTo(radius + x + canvasMargin, radius * (steps - 1) / steps + y + canvasMargin);
+
+		context.lineTo(radius + x + canvasMargin,
+			radius * (steps - 1) / steps + y + canvasMargin);
 		context.stroke();
 	}
 
@@ -90,7 +103,7 @@ function drawGrid(context, radius, steps) {
 
 	// Horisontal of cross
 	context.beginPath();
-	context.moveTo(radius * (steps - 1) / steps + canvasMargin, radius + 3);
+	context.moveTo(radius * (steps - 1) / steps + canvasMargin, radius + canvasMargin);
 	context.lineTo(radius * (steps + 1) / steps + canvasMargin, radius + canvasMargin);
 	context.stroke();
 }
@@ -162,7 +175,8 @@ function drawPoint(latitude, longitude, colour) {
 	}
 
 	context.beginPath();
-	context.arc(radius + x + canvasMargin, y + radius - k + canvasMargin, 3, 0, 2 * Math.PI, false);
+	context.arc(radius + x + canvasMargin,
+		y + radius - k + canvasMargin, 3, 0, 2 * Math.PI, false);
 	context.lineWidth = 1;
 	context.strokeStyle = colour;
 	context.stroke();
@@ -184,7 +198,8 @@ function drawPoint(latitude, longitude, colour) {
 		}
 		
 		context.beginPath();
-		context.arc(radius + x + canvasMargin, y + radius - k + canvasMargin, 3, 0, 2 * Math.PI, false);
+		context.arc(radius + x + canvasMargin,
+			y + radius - k + canvasMargin, 3, 0, 2 * Math.PI, false);
 		context.lineWidth = 1;
 		context.strokeStyle = colour;
 		context.stroke();
@@ -207,12 +222,32 @@ function drawPoint(latitude, longitude, colour) {
 		}
 		
 		context.beginPath();
-		context.arc(radius + x + canvasMargin, y + radius - k + canvasMargin, 3, 0, 2 * Math.PI, false);
+		context.arc(radius + x + canvasMargin,
+			y + radius - k + canvasMargin, 3, 0, 2 * Math.PI, false);
 		context.lineWidth = 1;
 		context.strokeStyle = colour;
 		context.stroke();
 		context.closePath();
 	}
+}
+
+function getCoordinates(map, mousePos, maxLatitude) {
+	// Расстояние от центра по горизонтали
+	let x = mousePos.x - map.radius + canvasMargin;
+	// Расстояние от центра по вертикали
+	let y = mousePos.y - map.radius + canvasMargin;
+	
+	// Расстояние от центра до точки (широта)
+	let latitude = maxLatitude - Math.sqrt(x ** 2 + y ** 2) /
+		map.radius * maxLatitude;
+
+	let longitude = maxLatitude - Math.atan(x / -y) / Math.PI * 180;
+	if (y > 0) longitude = longitude - 180;
+
+	return {
+		latitude: latitude,
+		longitude: longitude
+	};
 }
 
 function getMousePos(canvas, evt) {
