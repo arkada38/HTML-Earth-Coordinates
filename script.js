@@ -278,7 +278,7 @@ function drawPoint(latitude, longitude, colour) {
 	latitude = Math.min(Math.max(-90, latitude), 90);
 	longitude = Math.min(Math.max(-180, longitude), 180);
 	
-	if (longitude < -90) longitude = 360 + longitude;
+	if (longitude < -90) longitude += 360;
 	
 	// Azimuthal equidistant
 	context = azimuthal.context;
@@ -344,6 +344,56 @@ function drawPoint(latitude, longitude, colour) {
 		context.beginPath();
 		context.arc(radius + x + canvasMargin,
 			y + radius - k + canvasMargin, 3, 0, 2 * Math.PI, false);
+		context.lineWidth = 1;
+		context.strokeStyle = colour;
+		context.stroke();
+		context.closePath();
+	}
+	
+	if (0 <= longitude && longitude <= 180) {
+		// Western hemispere
+		context = west.context;
+		radius = west.radius - canvasMargin;
+		
+		let t1 = 2 * radius;
+		let h1 = radius * Math.abs(longitude - 90) / 90;
+		let r = h1 / 2 + t1 ** 2 / 8 / h1;
+		let t2 = t1 * Math.abs(latitude) / 90;
+		let h2 = r - Math.sqrt(r ** 2  - t2 ** 2 / 4);
+		if (longitude < 90) h2 = -h2;
+		
+		x = t1 - t1 * longitude / 180 + h2;
+		y = t1 - t1 * (latitude + 90) / 180;
+		
+		context.beginPath();
+		context.arc(x + canvasMargin,
+			y + canvasMargin, 3, 0, 2 * Math.PI, false);
+		context.lineWidth = 1;
+		context.strokeStyle = colour;
+		context.stroke();
+		context.closePath();
+	}
+	
+	if (longitude > 180) longitude -= 360;
+	
+	if (-180 <= longitude && longitude <= 0) {
+		// Eastern hemispere
+		context = east.context;
+		radius = east.radius - canvasMargin;
+		
+		let t1 = 2 * radius;
+		let h1 = radius * Math.abs(longitude + 90) / 90;
+		let r = h1 / 2 + t1 ** 2 / 8 / h1;
+		let t2 = t1 * Math.abs(latitude) / 90;
+		let h2 = r - Math.sqrt(r ** 2  - t2 ** 2 / 4);
+		if (longitude > -90) h2 = -h2;
+		
+		x = t1 + t1 * longitude / 180 + h2;
+		y = t1 - t1 * (latitude + 90) / 180;
+		
+		context.beginPath();
+		context.arc(x + canvasMargin,
+			y + canvasMargin, 3, 0, 2 * Math.PI, false);
 		context.lineWidth = 1;
 		context.strokeStyle = colour;
 		context.stroke();
