@@ -105,10 +105,6 @@ window.onresize = function(event) {
     draw();
 };
 
-window.onmousemove = function(event) {
-    //draw();
-};
-
 function drawPoleGrid(map) {
 	let context = map.context;
 	let radius = map.radius - canvasMargin;
@@ -259,9 +255,12 @@ function draw() {
 	// Eastern hemisphere
 	drawHemisphereGrid(eastern);
 	
-	drawPoint(80, -150, 'red');
-	drawPoint(80, +150, 'green');
-	drawPoint(60, 40, 'red');
+	drawPoint(13.750, -100.517, 'red');
+	drawPoint(55.75, -37.833, 'green');
+	drawPoint(-33.8861, 151.263, 'green');
+	drawPoint(-33.3960395, 18.8309002, 'green');
+	drawPoint(-34.6156537, -58.5737505, 'green');
+	/*drawPoint(60, 40, 'red');
 	drawPoint(60, +20, 'green');
 	drawPoint(40, -80, 'red');
 	drawPoint(40, +80, 'green');
@@ -279,7 +278,7 @@ function draw() {
 	drawPoint(-20, -100, 'purple');
 	drawPoint(-20, +100, 'lime');
 	drawPoint(+90, 0, 'gold');
-	drawPoint(-90, 0, 'brown');
+	drawPoint(-90, 0, 'brown');*/
 }
 
 function drawPoint(latitude, longitude, colour) {
@@ -402,7 +401,7 @@ function drawPoint(latitude, longitude, colour) {
 		let h2 = r - Math.sqrt(r ** 2  - t2 ** 2 / 4);
 		if (longitude > -90) h2 = -h2;
 		
-		x = t1 + t1 * longitude / 180 + h2;
+		x = -t1 * longitude / 180 - h2;
 		y = t1 - t1 * (latitude + 90) / 180;
 		
 		context.beginPath();
@@ -496,7 +495,7 @@ function getCoordinates(map, mousePos) {
 		let b = r - Math.abs(rx);
 		if ( x > 0) b = -b;
 
-		longitude = -90 - (b / map.radius) * 90;
+		longitude = -90 + (b / map.radius) * 90;
 	}
 
 	return {
