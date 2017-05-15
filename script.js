@@ -3,10 +3,10 @@
 
 var side, canvas, context, mouseX, mouseY, radius, canvasMargin;
 
-let azimuthal, north, south, west, east;
+let azimuthal, northern, southern, western, eastern;
 
 window.onload = function() {
-    var size = window.innerWidth * 0.33 - 44;
+    let size = window.innerWidth * 0.33 - 44;
 	canvasMargin = 2;
 
 	azimuthal = {
@@ -17,7 +17,7 @@ window.onload = function() {
 		steps: 18
 	}
 
-	north = {
+	northern = {
 		canvas: document.getElementById('cv_north'),
 		context: document.getElementById('cv_north').getContext('2d'),
 		side: size,
@@ -25,7 +25,7 @@ window.onload = function() {
 		steps: 9
 	}
 
-	south = {
+	southern = {
 		canvas: document.getElementById('cv_south'),
 		context: document.getElementById('cv_south').getContext('2d'),
 		side: size,
@@ -33,7 +33,7 @@ window.onload = function() {
 		steps: 9
 	}
 
-	west = {
+	western = {
 		canvas: document.getElementById('cv_west'),
 		context: document.getElementById('cv_west').getContext('2d'),
 		side: size,
@@ -41,7 +41,7 @@ window.onload = function() {
 		steps: 12
 	}
 
-	east = {
+	eastern = {
 		canvas: document.getElementById('cv_east'),
 		context: document.getElementById('cv_east').getContext('2d'),
 		side: size,
@@ -53,21 +53,35 @@ window.onload = function() {
 		let mousePos = getMousePos(azimuthal.canvas, evt);
 		let coordinates = getCoordinates(azimuthal, mousePos);
 		draw();
-		drawPoint(coordinates.latitude, coordinates.longitude, "orange");
+		drawPoint(coordinates.latitude, coordinates.longitude, "black");
 	}, false);
 
-	north.canvas.addEventListener('mousemove', function(evt) {
-		let mousePos = getMousePos(north.canvas, evt);
-		let coordinates = getCoordinates(north, mousePos);
+	northern.canvas.addEventListener('mousemove', function(evt) {
+		let mousePos = getMousePos(northern.canvas, evt);
+		let coordinates = getCoordinates(northern, mousePos);
 		draw();
-		drawPoint(coordinates.latitude, coordinates.longitude, "orange");
+		drawPoint(coordinates.latitude, coordinates.longitude, "black");
 	}, false);
 
-	south.canvas.addEventListener('mousemove', function(evt) {
-		let mousePos = getMousePos(south.canvas, evt);
-		let coordinates = getCoordinates(south, mousePos);
+	southern.canvas.addEventListener('mousemove', function(evt) {
+		let mousePos = getMousePos(southern.canvas, evt);
+		let coordinates = getCoordinates(southern, mousePos);
 		draw();
-		drawPoint(coordinates.latitude, coordinates.longitude, "orange");
+		drawPoint(coordinates.latitude, coordinates.longitude, "black");
+	}, false);
+
+	western.canvas.addEventListener('mousemove', function(evt) {
+		let mousePos = getMousePos(western.canvas, evt);
+		let coordinates = getCoordinates(western, mousePos);
+		draw();
+		drawPoint(coordinates.latitude, coordinates.longitude, "black");
+	}, false);
+
+	eastern.canvas.addEventListener('mousemove', function(evt) {
+		let mousePos = getMousePos(eastern.canvas, evt);
+		let coordinates = getCoordinates(eastern, mousePos);
+		draw();
+		drawPoint(coordinates.latitude, coordinates.longitude, "black");
 	}, false);
 
 	draw();
@@ -77,16 +91,16 @@ window.onresize = function(event) {
 	var size = window.innerWidth * 0.33 - 44;
 
 	azimuthal.side = size;
-	north.side = size;
-	south.side = size;
-	west.side = size;
-	east.side = size;
+	northern.side = size;
+	southern.side = size;
+	western.side = size;
+	eastern.side = size;
 
 	azimuthal.radius = azimuthal.side / 2 - canvasMargin;
-	north.radius = north.side / 2 - canvasMargin;
-	south.radius = south.side / 2 - canvasMargin;
-	west.radius = west.side / 2 - canvasMargin;
-	east.radius = east.side / 2 - canvasMargin;
+	northern.radius = northern.side / 2 - canvasMargin;
+	southern.radius = southern.side / 2 - canvasMargin;
+	western.radius = western.side / 2 - canvasMargin;
+	eastern.radius = eastern.side / 2 - canvasMargin;
 
     draw();
 };
@@ -222,28 +236,28 @@ function draw() {
 	azimuthal.context.canvas.width = azimuthal.side;
 	azimuthal.context.canvas.height = azimuthal.side;
 
-	north.context.canvas.width = north.side;
-	north.context.canvas.height = north.side;
+	northern.context.canvas.width = northern.side;
+	northern.context.canvas.height = northern.side;
 
-	south.context.canvas.width = south.side;
-	south.context.canvas.height = south.side;
+	southern.context.canvas.width = southern.side;
+	southern.context.canvas.height = southern.side;
 
-	west.context.canvas.width = west.side;
-	west.context.canvas.height = west.side;
+	western.context.canvas.width = western.side;
+	western.context.canvas.height = western.side;
 
-	east.context.canvas.width = east.side;
-	east.context.canvas.height = east.side;
+	eastern.context.canvas.width = eastern.side;
+	eastern.context.canvas.height = eastern.side;
 
 	// Azimuthal equidistant
 	drawPoleGrid(azimuthal);
-	// North pole
-	drawPoleGrid(north);
-	// South pole
-	drawPoleGrid(south);
-	// West hemisphere
-	drawHemisphereGrid(west);
-	// East hemisphere
-	drawHemisphereGrid(east);
+	// Northern hemisphere
+	drawPoleGrid(northern);
+	// Southern hemisphere
+	drawPoleGrid(southern);
+	// Western hemisphere
+	drawHemisphereGrid(western);
+	// Eastern hemisphere
+	drawHemisphereGrid(eastern);
 	
 	drawPoint(80, -150, 'red');
 	drawPoint(80, +150, 'green');
@@ -303,9 +317,9 @@ function drawPoint(latitude, longitude, colour) {
 	context.closePath();
 	
 	if (0 <= latitude && latitude <= 90) {
-		// North pole
-		context = north.context;
-		radius = north.radius - canvasMargin;
+		// Northern hemisphere
+		context = northern.context;
+		radius = northern.radius - canvasMargin;
 		
 		k = radius * (1 - (latitude / 90));
 		t = 2 * k * Math.cos((longitude + 90) / 360 * Math.PI);
@@ -327,9 +341,9 @@ function drawPoint(latitude, longitude, colour) {
 	}
 	
 	if (-90 <= latitude && latitude <= 0) {
-		// South pole
-		context = south.context;
-		radius = south.radius - canvasMargin;
+		// Southern hemisphere
+		context = southern.context;
+		radius = southern.radius - canvasMargin;
 
 		k = radius * (1 + (latitude / 90));
 		t = 2 * k * Math.sin((longitude - 90) / 360 * Math.PI);
@@ -352,8 +366,8 @@ function drawPoint(latitude, longitude, colour) {
 	
 	if (0 <= longitude && longitude <= 180) {
 		// Western hemispere
-		context = west.context;
-		radius = west.radius - canvasMargin;
+		context = western.context;
+		radius = western.radius - canvasMargin;
 		
 		let t1 = 2 * radius;
 		let h1 = radius * Math.abs(longitude - 90) / 90;
@@ -378,8 +392,8 @@ function drawPoint(latitude, longitude, colour) {
 	
 	if (-180 <= longitude && longitude <= 0) {
 		// Eastern hemispere
-		context = east.context;
-		radius = east.radius - canvasMargin;
+		context = eastern.context;
+		radius = eastern.radius - canvasMargin;
 		
 		let t1 = 2 * radius;
 		let h1 = radius * Math.abs(longitude + 90) / 90;
@@ -409,7 +423,7 @@ function getCoordinates(map, mousePos) {
 
 	let latitude, longitude;
 	
-	if (map == north) {
+	if (map == northern) {
 		// Расстояние от центра до точки (широта)
 		latitude = 90 - Math.sqrt(x ** 2 + y ** 2) /
 			map.radius * 90;
@@ -419,7 +433,7 @@ function getCoordinates(map, mousePos) {
 		if (y > 0) longitude = longitude - 180;
 	}
 	
-	if (map == south) {
+	if (map == southern) {
 		// Расстояние от центра до точки (широта)
 		latitude = -90 + Math.sqrt(x ** 2 + y ** 2) /
 			map.radius * 90;
@@ -437,6 +451,52 @@ function getCoordinates(map, mousePos) {
 		// Угол (долгота)
 		longitude = 90 - Math.atan(x / -y) / Math.PI * 180;
 		if (y > 0) longitude = longitude - 180;
+	}
+	
+	if (map == western) {
+		// По вертикали (широта)
+		latitude = -90 * y / map.radius;
+
+		// По горизонтали (долгота)
+		// Поиск центра окружности по 3 точкам
+		// (через пересечение перпендикуляров)
+		// Коэффициент наклона первой прямой
+		let ma = (map.radius + y) / x;
+		// Коэффициент наклона второй прямой
+		let mb = -(map.radius - y) / x;
+		// Расстояние от центра полушария до радиуса
+		let rx = (ma * mb * (-2 * map.radius) + (mb - ma) * x) / 2 / (mb - ma);
+		// Радиус дуги долготы
+		let r = Math.sqrt(y ** 2 + (x - rx) ** 2);
+
+		let b = r - Math.abs(rx);
+		if ( x > 0) b = -b;
+
+		longitude = 90 + (b / map.radius) * 90;
+	}
+	
+	if (map == eastern) {
+		// По вертикали (широта)
+		latitude = -90 * y / map.radius;
+
+		// По горизонтали (долгота)
+
+		// Поиск центра окружности по 3 точкам
+		// (через пересечение перпендикуляров)
+
+		// Коэффициент наклона первой прямой
+		let ma = (map.radius + y) / x;
+		// Коэффициент наклона второй прямой
+		let mb = -(map.radius - y) / x;
+		// Расстояние от центра полушария до радиуса
+		let rx = (ma * mb * (-2 * map.radius) + (mb - ma) * x) / 2 / (mb - ma);
+		// Радиус дуги долготы
+		let r = Math.sqrt(y ** 2 + (x - rx) ** 2);
+
+		let b = r - Math.abs(rx);
+		if ( x > 0) b = -b;
+
+		longitude = -90 - (b / map.radius) * 90;
 	}
 
 	return {
