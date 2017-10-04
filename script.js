@@ -6,89 +6,21 @@ var side, canvas, context, mouseX, mouseY, radius, canvasMargin;
 let azimuthal, northern, southern, western, eastern;
 
 window.onload = function() {
-    let size = window.innerWidth * 0.33 - 44;
+	let size = window.innerWidth * 0.33 - 44;
+	size *= window.devicePixelRatio;
 	canvasMargin = 2;
 
-	azimuthal = {
-		canvas: document.getElementById('cv_azimuthal'),
-		context: document.getElementById('cv_azimuthal').getContext('2d'),
-		side: size,
-		radius: size / 2 - canvasMargin,
-		steps: 18
-	}
+	initHemispheres(size);
 
-	northern = {
-		canvas: document.getElementById('cv_north'),
-		context: document.getElementById('cv_north').getContext('2d'),
-		side: size,
-		radius: size / 2 - canvasMargin,
-		steps: 9
-	}
-
-	southern = {
-		canvas: document.getElementById('cv_south'),
-		context: document.getElementById('cv_south').getContext('2d'),
-		side: size,
-		radius: size / 2 - canvasMargin,
-		steps: 9
-	}
-
-	western = {
-		canvas: document.getElementById('cv_west'),
-		context: document.getElementById('cv_west').getContext('2d'),
-		side: size,
-		radius: size / 2 - canvasMargin,
-		steps: 12
-	}
-
-	eastern = {
-		canvas: document.getElementById('cv_east'),
-		context: document.getElementById('cv_east').getContext('2d'),
-		side: size,
-		radius: size / 2 - canvasMargin,
-		steps: 12
-	}
-
-	azimuthal.canvas.addEventListener('mousemove', function(evt) {
-		let mousePos = getMousePos(azimuthal.canvas, evt);
-		let coordinates = getCoordinates(azimuthal, mousePos);
-		draw();
-		drawPoint(coordinates.latitude, coordinates.longitude, "black");
-	}, false);
-
-	northern.canvas.addEventListener('mousemove', function(evt) {
-		let mousePos = getMousePos(northern.canvas, evt);
-		let coordinates = getCoordinates(northern, mousePos);
-		draw();
-		drawPoint(coordinates.latitude, coordinates.longitude, "black");
-	}, false);
-
-	southern.canvas.addEventListener('mousemove', function(evt) {
-		let mousePos = getMousePos(southern.canvas, evt);
-		let coordinates = getCoordinates(southern, mousePos);
-		draw();
-		drawPoint(coordinates.latitude, coordinates.longitude, "black");
-	}, false);
-
-	western.canvas.addEventListener('mousemove', function(evt) {
-		let mousePos = getMousePos(western.canvas, evt);
-		let coordinates = getCoordinates(western, mousePos);
-		draw();
-		drawPoint(coordinates.latitude, coordinates.longitude, "black");
-	}, false);
-
-	eastern.canvas.addEventListener('mousemove', function(evt) {
-		let mousePos = getMousePos(eastern.canvas, evt);
-		let coordinates = getCoordinates(eastern, mousePos);
-		draw();
-		drawPoint(coordinates.latitude, coordinates.longitude, "black");
-	}, false);
+    addMouseMoveListener();
 
 	draw();
 };
 
 window.onresize = function(event) {
-	var size = window.innerWidth * 0.33 - 44;
+	var size = Math.round(window.innerWidth * 0.33 - 44);
+	let styleSize = size + 'px';
+	size *= window.devicePixelRatio;
 
 	azimuthal.side = size;
 	northern.side = size;
@@ -101,9 +33,112 @@ window.onresize = function(event) {
 	southern.radius = southern.side / 2 - canvasMargin;
 	western.radius = western.side / 2 - canvasMargin;
 	eastern.radius = eastern.side / 2 - canvasMargin;
+	
+	azimuthal.canvas.style.width = styleSize;
+	northern.canvas.style.width = styleSize;
+	southern.canvas.style.width = styleSize;
+	western.canvas.style.width = styleSize;
+	eastern.canvas.style.width = styleSize;
+
+	azimuthal.canvas.style.height = styleSize;
+	northern.canvas.style.height = styleSize;
+	southern.canvas.style.height = styleSize;
+	western.canvas.style.height = styleSize;
+	eastern.canvas.style.height = styleSize;
 
     draw();
 };
+
+function initHemispheres(size) {
+	let styleSize = Math.round(size / window.devicePixelRatio) + 'px';
+
+    azimuthal = {
+		canvas: document.getElementById('cv_azimuthal'),
+		context: document.getElementById('cv_azimuthal').getContext('2d'),
+		side: size,
+		radius: size / 2 - canvasMargin,
+		steps: 18
+	};
+	azimuthal.canvas.style.width = styleSize;
+	azimuthal.canvas.style.height = styleSize;
+	
+	northern = {
+		canvas: document.getElementById('cv_north'),
+		context: document.getElementById('cv_north').getContext('2d'),
+		side: size,
+		radius: size / 2 - canvasMargin,
+		steps: 9
+	};
+	northern.canvas.style.width = styleSize;
+	northern.canvas.style.height = styleSize;
+	
+	southern = {
+		canvas: document.getElementById('cv_south'),
+		context: document.getElementById('cv_south').getContext('2d'),
+		side: size,
+		radius: size / 2 - canvasMargin,
+		steps: 9
+	};
+	southern.canvas.style.width = styleSize;
+	southern.canvas.style.height = styleSize;
+	
+	western = {
+		canvas: document.getElementById('cv_west'),
+		context: document.getElementById('cv_west').getContext('2d'),
+		side: size,
+		radius: size / 2 - canvasMargin,
+		steps: 12
+	};
+	western.canvas.style.width = styleSize;
+	western.canvas.style.height = styleSize;
+	
+	eastern = {
+		canvas: document.getElementById('cv_east'),
+		context: document.getElementById('cv_east').getContext('2d'),
+		side: size,
+		radius: size / 2 - canvasMargin,
+		steps: 12
+	};
+	eastern.canvas.style.width = styleSize;
+	eastern.canvas.style.height = styleSize;
+}
+
+function addMouseMoveListener() {
+    azimuthal.canvas.addEventListener('mousemove', function(evt) {
+		let mousePos = getMousePos(azimuthal.canvas, evt);
+		let coordinates = getCoordinates(azimuthal, mousePos);
+		draw();
+		drawPoint(coordinates.latitude, coordinates.longitude, "black");
+	}, false);
+
+	northern.canvas.addEventListener('mousemove', function(evt) {
+		let mousePos = getMousePos(northern.canvas, evt);
+		let coordinates = getCoordinates(northern, mousePos);
+		draw();
+		drawPoint(coordinates.latitude, coordinates.longitude, "black");
+	}, false);
+	
+	southern.canvas.addEventListener('mousemove', function(evt) {
+		let mousePos = getMousePos(southern.canvas, evt);
+		let coordinates = getCoordinates(southern, mousePos);
+		draw();
+		drawPoint(coordinates.latitude, coordinates.longitude, "black");
+	}, false);
+	
+	western.canvas.addEventListener('mousemove', function(evt) {
+		let mousePos = getMousePos(western.canvas, evt);
+		let coordinates = getCoordinates(western, mousePos);
+		draw();
+		drawPoint(coordinates.latitude, coordinates.longitude, "black");
+	}, false);
+	
+	eastern.canvas.addEventListener('mousemove', function(evt) {
+		let mousePos = getMousePos(eastern.canvas, evt);
+		let coordinates = getCoordinates(eastern, mousePos);
+		draw();
+		drawPoint(coordinates.latitude, coordinates.longitude, "black");
+	}, false);
+}
 
 function drawPoleGrid(map) {
 	let context = map.context;
@@ -308,8 +343,8 @@ function drawPoint(latitude, longitude, colour) {
 	}
 
 	context.beginPath();
-	context.arc(radius + x + canvasMargin,
-		y + radius - k + canvasMargin, 3, 0, 2 * Math.PI, false);
+	context.arc(radius + x + canvasMargin + .5,
+		y + radius - k + canvasMargin + .5, 3, 0, 2 * Math.PI, false);
 	context.lineWidth = 1;
 	context.strokeStyle = colour;
 	context.stroke();
@@ -416,9 +451,9 @@ function drawPoint(latitude, longitude, colour) {
 
 function getCoordinates(map, mousePos) {
 	// Расстояние от центра по горизонтали
-	let x = mousePos.x - map.radius + canvasMargin;
+	let x = mousePos.x * window.devicePixelRatio - map.radius + canvasMargin;
 	// Расстояние от центра по вертикали
-	let y = mousePos.y - map.radius + canvasMargin;
+	let y = mousePos.y * window.devicePixelRatio - map.radius + canvasMargin;
 
 	let latitude, longitude;
 	
