@@ -145,6 +145,8 @@ function drawPoleGrid(map) {
 	let radius = map.radius - canvasMargin;
 	let steps = map.steps;
 
+	context.globalAlpha = .5;
+
 	// Latitudes (окружности)
 	for (let i = 1; i <= steps; i++) {
 		context.beginPath();
@@ -192,6 +194,8 @@ function drawPoleGrid(map) {
 	context.moveTo(radius * (steps - 1) / steps + canvasMargin, radius + canvasMargin);
 	context.lineTo(radius * (steps + 1) / steps + canvasMargin, radius + canvasMargin);
 	context.stroke();
+	
+	context.globalAlpha = 1;
 }
 
 function drawHemisphereGrid(map) {
@@ -199,6 +203,7 @@ function drawHemisphereGrid(map) {
 	let radius = map.radius - canvasMargin;
 	let steps = map.steps;
 
+	context.globalAlpha = .5;
 	context.beginPath();
 
 	// Окружность сферы
@@ -261,6 +266,8 @@ function drawHemisphereGrid(map) {
 		context.stroke();
 		context.closePath();
 	}
+
+	context.globalAlpha = 1;
 }
 
 function draw() {
@@ -290,38 +297,44 @@ function draw() {
 	// Eastern hemisphere
 	drawHemisphereGrid(eastern);
 	
-	drawPoint(13.750, -100.517, 'red');
-	drawPoint(55.75, -37.833, 'green');
-	drawPoint(-33.8861, 151.263, 'green');
-	drawPoint(-33.3960395, 18.8309002, 'green');
-	drawPoint(-34.6156537, -58.5737505, 'green');
-	/*drawPoint(60, 40, 'red');
-	drawPoint(60, +20, 'green');
-	drawPoint(40, -80, 'red');
-	drawPoint(40, +80, 'green');
-	drawPoint(20, -100, 'red');
-	drawPoint(20, +100, 'green');
-	drawPoint(0, -170, 'red');
-	drawPoint(0, +170, 'green');
-	
-	drawPoint(-80, -150, 'purple');
-	drawPoint(-80, +150, 'lime');
-	drawPoint(-60, -20, 'purple');
-	drawPoint(-60, +20, 'lime');
-	drawPoint(-40, -80, 'purple');
-	drawPoint(-40, +80, 'lime');
-	drawPoint(-20, -100, 'purple');
-	drawPoint(-20, +100, 'lime');
-	drawPoint(+90, 0, 'gold');
-	drawPoint(-90, 0, 'brown');*/
+	drawPoint(55.7498598,37.352323, 'green', 'Moscow');
+	drawPoint(54.9700936,82.8093239, 'blue', 'Novosibirsk');
+	drawPoint(43.1738098,131.9657976, 'blue', 'Vladivostok');
+	drawPoint(39.9390731, 116.1172797, 'green', 'Beijing');
+
+	drawPoint(52.5069704,13.2846504, 'red', 'Berlin');
+	drawPoint(51.528308,-0.3817765, 'blue', 'London');
+
+	drawPoint(34.0207305, -118.6919138, 'green', 'Los Angeles');
+	drawPoint(40.6976637,-74.1197636, 'green', 'New York');
+
+	drawPoint(7.883403,98.374404, 'green', 'Phuket');
+
+	drawPoint(-37.9716929,144.7729595, 'red', 'Melbourne');
+	drawPoint(-33.8478796,150.7918925, 'green', 'Sydney');
+	drawPoint(-32.0391738,115.6813572, 'green', 'Perth');
+	drawPoint(-12.425724,130.8632685, 'green', 'Darwin');
+	drawPoint(-27.3812534,152.7130162, 'green', 'Brisbane');
+	drawPoint(-34.9998826,138.3309827, 'green', 'Adelaide');
+	drawPoint(-41.2442198,174.6918153, 'gold', 'Wellington');
+
+	drawPoint(-54.6239778,-65.2356668, 'blue', 'Bahía Thetis');
+	drawPoint(-34.6156625,-58.5033379, 'blue', 'Buenos Aires');
+	drawPoint(-23.6815315,-46.8754808, 'blue', 'São Paulo');
+	drawPoint(-33.4724228,-70.7699136, 'blue', 'Santiago de Chile');
+
+	drawPoint(35.6693863,139.6012976, 'blue', 'Tokyo');
+	//drawPoint(60, +20, 'blue', '');
 }
 
-function drawPoint(latitude, longitude, colour) {
-	var k, t, x, y;
+function drawPoint(latitude, longitude, colour, title = '') {
+	let k, t, x, y;
 	/*
 	k - расстояние от полюса к координате
 	t - хорда
 	*/
+
+	let pointSize = 3 * window.devicePixelRatio;
 	
 	latitude = Math.min(Math.max(-90, latitude), 90);
 	longitude = Math.min(Math.max(-180, longitude), 180);
@@ -343,12 +356,18 @@ function drawPoint(latitude, longitude, colour) {
 	}
 
 	context.beginPath();
-	context.arc(radius + x + canvasMargin + .5,
-		y + radius - k + canvasMargin + .5, 3, 0, 2 * Math.PI, false);
+	context.arc(radius + x + canvasMargin,
+		y + radius - k + canvasMargin, pointSize, 0, 2 * Math.PI, false);
 	context.lineWidth = 1;
 	context.strokeStyle = colour;
 	context.stroke();
 	context.closePath();
+	
+	context.font = "20px Arial";
+	context.fillStyle = colour;
+	context.textAlign = "center";
+	context.fillText(title, radius + x + canvasMargin,
+		y + radius - k + canvasMargin - pointSize * 2);
 	
 	if (0 <= latitude && latitude <= 90) {
 		// Northern hemisphere
@@ -367,11 +386,17 @@ function drawPoint(latitude, longitude, colour) {
 		
 		context.beginPath();
 		context.arc(radius + x + canvasMargin,
-			y + radius - k + canvasMargin, 3, 0, 2 * Math.PI, false);
+			y + radius - k + canvasMargin, pointSize, 0, 2 * Math.PI, false);
 		context.lineWidth = 1;
 		context.strokeStyle = colour;
 		context.stroke();
 		context.closePath();
+		
+		context.font = "20px Arial";
+		context.fillStyle = colour;
+		context.textAlign = "center";
+		context.fillText(title, radius + x + canvasMargin,
+			y + radius - k + canvasMargin - pointSize * 2);
 	}
 	
 	if (-90 <= latitude && latitude <= 0) {
@@ -391,11 +416,17 @@ function drawPoint(latitude, longitude, colour) {
 		
 		context.beginPath();
 		context.arc(radius + x + canvasMargin,
-			y + radius - k + canvasMargin, 3, 0, 2 * Math.PI, false);
+			y + radius - k + canvasMargin, pointSize, 0, 2 * Math.PI, false);
 		context.lineWidth = 1;
 		context.strokeStyle = colour;
 		context.stroke();
 		context.closePath();
+		
+		context.font = "20px Arial";
+		context.fillStyle = colour;
+		context.textAlign = "center";
+		context.fillText(title, radius + x + canvasMargin,
+			y + radius - k + canvasMargin - pointSize * 2);
 	}
 	
 	if (0 <= longitude && longitude <= 180) {
@@ -410,16 +441,22 @@ function drawPoint(latitude, longitude, colour) {
 		let h2 = r - Math.sqrt(r ** 2  - t2 ** 2 / 4);
 		if (longitude < 90) h2 = -h2;
 		
-		x = t1 - t1 * longitude / 180 + h2;
+		x = t1 * longitude / 180 - h2;
 		y = t1 - t1 * (latitude + 90) / 180;
 		
 		context.beginPath();
 		context.arc(x + canvasMargin,
-			y + canvasMargin, 3, 0, 2 * Math.PI, false);
+			y + canvasMargin, pointSize, 0, 2 * Math.PI, false);
 		context.lineWidth = 1;
 		context.strokeStyle = colour;
 		context.stroke();
 		context.closePath();
+		
+		context.font = "20px Arial";
+		context.fillStyle = colour;
+		context.textAlign = "center";
+		context.fillText(title, x + canvasMargin,
+			y + canvasMargin - pointSize * 2);
 	}
 	
 	if (longitude > 180) longitude -= 360;
@@ -436,16 +473,22 @@ function drawPoint(latitude, longitude, colour) {
 		let h2 = r - Math.sqrt(r ** 2  - t2 ** 2 / 4);
 		if (longitude > -90) h2 = -h2;
 		
-		x = -t1 * longitude / 180 - h2;
+		x = t1 * (180 + longitude) / 180 + h2;
 		y = t1 - t1 * (latitude + 90) / 180;
 		
 		context.beginPath();
 		context.arc(x + canvasMargin,
-			y + canvasMargin, 3, 0, 2 * Math.PI, false);
+			y + canvasMargin, pointSize, 0, 2 * Math.PI, false);
 		context.lineWidth = 1;
 		context.strokeStyle = colour;
 		context.stroke();
 		context.closePath();
+		
+		context.font = "20px Arial";
+		context.fillStyle = colour;
+		context.textAlign = "center";
+		context.fillText(title, x + canvasMargin,
+			y + canvasMargin - pointSize * 2);
 	}
 }
 
@@ -506,7 +549,7 @@ function getCoordinates(map, mousePos) {
 		let b = r - Math.abs(rx);
 		if ( x > 0) b = -b;
 
-		longitude = 90 + (b / map.radius) * 90;
+		longitude = (1 - b / map.radius) * 90;
 	}
 	
 	if (map == eastern) {
@@ -530,7 +573,7 @@ function getCoordinates(map, mousePos) {
 		let b = r - Math.abs(rx);
 		if ( x > 0) b = -b;
 
-		longitude = -90 + (b / map.radius) * 90;
+		longitude = (-1 - b / map.radius) * 90;
 	}
 
 	return {
