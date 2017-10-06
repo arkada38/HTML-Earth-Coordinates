@@ -3,7 +3,7 @@
 
 var side, canvas, context, mouseX, mouseY, radius, canvasMargin;
 
-let azimuthal, northern, southern, western, eastern;
+let nothern_azimuthal, southern_azimuthal, northern, southern, western, eastern;
 
 window.onload = function() {
 	let size = window.innerWidth * 0.33 - 44;
@@ -22,25 +22,29 @@ window.onresize = function(event) {
 	let styleSize = size + 'px';
 	size *= window.devicePixelRatio;
 
-	azimuthal.side = size;
+	nothern_azimuthal.side = size;
+	southern_azimuthal.side = size;
 	northern.side = size;
 	southern.side = size;
 	western.side = size;
 	eastern.side = size;
 
-	azimuthal.radius = azimuthal.side / 2 - canvasMargin;
+	nothern_azimuthal.radius = nothern_azimuthal.side / 2 - canvasMargin;
+	southern_azimuthal.radius = nothern_azimuthal.side / 2 - canvasMargin;
 	northern.radius = northern.side / 2 - canvasMargin;
 	southern.radius = southern.side / 2 - canvasMargin;
 	western.radius = western.side / 2 - canvasMargin;
 	eastern.radius = eastern.side / 2 - canvasMargin;
 	
-	azimuthal.canvas.style.width = styleSize;
+	nothern_azimuthal.canvas.style.width = styleSize;
+	southern_azimuthal.canvas.style.width = styleSize;
 	northern.canvas.style.width = styleSize;
 	southern.canvas.style.width = styleSize;
 	western.canvas.style.width = styleSize;
 	eastern.canvas.style.width = styleSize;
 
-	azimuthal.canvas.style.height = styleSize;
+	nothern_azimuthal.canvas.style.height = styleSize;
+	southern_azimuthal.canvas.style.height = styleSize;
 	northern.canvas.style.height = styleSize;
 	southern.canvas.style.height = styleSize;
 	western.canvas.style.height = styleSize;
@@ -52,15 +56,25 @@ window.onresize = function(event) {
 function initHemispheres(size) {
 	let styleSize = Math.round(size / window.devicePixelRatio) + 'px';
 
-    azimuthal = {
-		canvas: document.getElementById('cv_azimuthal'),
-		context: document.getElementById('cv_azimuthal').getContext('2d'),
+    nothern_azimuthal = {
+		canvas: document.getElementById('cv_nothern_azimuthal'),
+		context: document.getElementById('cv_nothern_azimuthal').getContext('2d'),
 		side: size,
 		radius: size / 2 - canvasMargin,
 		steps: 18
 	};
-	azimuthal.canvas.style.width = styleSize;
-	azimuthal.canvas.style.height = styleSize;
+	nothern_azimuthal.canvas.style.width = styleSize;
+	nothern_azimuthal.canvas.style.height = styleSize;
+
+    southern_azimuthal = {
+		canvas: document.getElementById('cv_southern_azimuthal'),
+		context: document.getElementById('cv_southern_azimuthal').getContext('2d'),
+		side: size,
+		radius: size / 2 - canvasMargin,
+		steps: 18
+	};
+	southern_azimuthal.canvas.style.width = styleSize;
+	southern_azimuthal.canvas.style.height = styleSize;
 	
 	northern = {
 		canvas: document.getElementById('cv_north'),
@@ -104,9 +118,16 @@ function initHemispheres(size) {
 }
 
 function addMouseMoveListener() {
-    azimuthal.canvas.addEventListener('mousemove', function(evt) {
-		let mousePos = getMousePos(azimuthal.canvas, evt);
-		let coordinates = getCoordinates(azimuthal, mousePos);
+    nothern_azimuthal.canvas.addEventListener('mousemove', function(evt) {
+		let mousePos = getMousePos(nothern_azimuthal.canvas, evt);
+		let coordinates = getCoordinates(nothern_azimuthal, mousePos);
+		draw();
+		drawPoint(coordinates.latitude, coordinates.longitude, "black");
+	}, false);
+
+    southern_azimuthal.canvas.addEventListener('mousemove', function(evt) {
+		let mousePos = getMousePos(southern_azimuthal.canvas, evt);
+		let coordinates = getCoordinates(southern_azimuthal, mousePos);
 		draw();
 		drawPoint(coordinates.latitude, coordinates.longitude, "black");
 	}, false);
@@ -231,7 +252,7 @@ function drawHemisphereGrid(map) {
 		// Расстояние до центра окружности
 		let h = Math.sqrt(r ** 2 - t ** 2 / 4)
 
-		let alfa = Math.asin(t * (azimuthal.steps - 2) / azimuthal.steps / 2 / r);
+		let alfa = Math.asin(t * (nothern_azimuthal.steps - 2) / nothern_azimuthal.steps / 2 / r);
 
 		// Левая часть
 		context.beginPath();
@@ -248,7 +269,7 @@ function drawHemisphereGrid(map) {
 		context.closePath();
 	}
 
-	steps = azimuthal.steps;
+	steps = nothern_azimuthal.steps;
 	// Latitudes (горизонтальные линии)
 	for (let i = 1; i < steps; i++) {
 		// Высота сегмента
@@ -271,8 +292,11 @@ function drawHemisphereGrid(map) {
 }
 
 function draw() {
-	azimuthal.context.canvas.width = azimuthal.side;
-	azimuthal.context.canvas.height = azimuthal.side;
+	nothern_azimuthal.context.canvas.width = nothern_azimuthal.side;
+	nothern_azimuthal.context.canvas.height = nothern_azimuthal.side;
+
+	southern_azimuthal.context.canvas.width = southern_azimuthal.side;
+	southern_azimuthal.context.canvas.height = southern_azimuthal.side;
 
 	northern.context.canvas.width = northern.side;
 	northern.context.canvas.height = northern.side;
@@ -286,8 +310,10 @@ function draw() {
 	eastern.context.canvas.width = eastern.side;
 	eastern.context.canvas.height = eastern.side;
 
-	// Azimuthal equidistant
-	drawPoleGrid(azimuthal);
+	// Nothern azimuthal equidistant
+	drawPoleGrid(nothern_azimuthal);
+	// Southern azimuthal equidistant
+	drawPoleGrid(southern_azimuthal);
 	// Northern hemisphere
 	drawPoleGrid(northern);
 	// Southern hemisphere
@@ -341,36 +367,32 @@ function drawPoint(latitude, longitude, colour, title = '') {
 	
 	if (longitude < -90) longitude += 360;
 	
-	// Azimuthal equidistant
-	context = azimuthal.context;
-	radius = azimuthal.radius - canvasMargin;
+	//#region Nothern azimuthal equidistant
+	context = nothern_azimuthal.context;
+	radius = nothern_azimuthal.radius - canvasMargin;
 	
     k = radius * (90 - latitude) / 180;
 	t = 2 * k * Math.cos((longitude + 90) / 360 * Math.PI);
 	x = t * Math.sqrt(k ** 2 - t ** 2 / 4) / k;
 	y = Math.sqrt(t ** 2 - x ** 2);
 	
-	if (isNaN(x)) {
-		x = 0;
-		y = 0;
-	}
-
-	context.beginPath();
-	context.arc(radius + x + canvasMargin,
-		y + radius - k + canvasMargin, pointSize, 0, 2 * Math.PI, false);
-	context.lineWidth = 1;
-	context.strokeStyle = colour;
-	context.stroke();
-	context.closePath();
+	drawPolePointAndTitle();
+	//#endregion
 	
-	context.font = "20px Arial";
-	context.fillStyle = colour;
-	context.textAlign = "center";
-	context.fillText(title, radius + x + canvasMargin,
-		y + radius - k + canvasMargin - pointSize * 2);
+	//#region Southern azimuthal equidistant
+	context = southern_azimuthal.context;
+	radius = southern_azimuthal.radius - canvasMargin;
 	
+    k = radius * (90 + latitude) / 180;
+	t = 2 * k * Math.sin((longitude - 90) / 360 * Math.PI);
+	x = t * Math.sqrt(k ** 2 - t ** 2 / 4) / k;
+	y = Math.sqrt(t ** 2 - x ** 2);
+	
+	drawPolePointAndTitle();
+	//#endregion
+	
+	//#region Northern hemisphere
 	if (0 <= latitude && latitude <= 90) {
-		// Northern hemisphere
 		context = northern.context;
 		radius = northern.radius - canvasMargin;
 		
@@ -379,28 +401,12 @@ function drawPoint(latitude, longitude, colour, title = '') {
 		x = t * Math.sqrt(k ** 2 - t ** 2 / 4) / k;
 		y = Math.sqrt(t ** 2 - x ** 2);
 	
-		if (isNaN(x)) {
-			x = 0;
-			y = 0;
-		}
-		
-		context.beginPath();
-		context.arc(radius + x + canvasMargin,
-			y + radius - k + canvasMargin, pointSize, 0, 2 * Math.PI, false);
-		context.lineWidth = 1;
-		context.strokeStyle = colour;
-		context.stroke();
-		context.closePath();
-		
-		context.font = "20px Arial";
-		context.fillStyle = colour;
-		context.textAlign = "center";
-		context.fillText(title, radius + x + canvasMargin,
-			y + radius - k + canvasMargin - pointSize * 2);
+		drawPolePointAndTitle();
 	}
+	//#endregion
 	
+	//#region Southern hemisphere
 	if (-90 <= latitude && latitude <= 0) {
-		// Southern hemisphere
 		context = southern.context;
 		radius = southern.radius - canvasMargin;
 
@@ -409,28 +415,12 @@ function drawPoint(latitude, longitude, colour, title = '') {
 		x = t * Math.sqrt(k ** 2 - t ** 2 / 4) / k;
 		y = Math.sqrt(t ** 2 - x ** 2);
 	
-		if (isNaN(x)) {
-			x = 0;
-			y = 0;
-		}
-		
-		context.beginPath();
-		context.arc(radius + x + canvasMargin,
-			y + radius - k + canvasMargin, pointSize, 0, 2 * Math.PI, false);
-		context.lineWidth = 1;
-		context.strokeStyle = colour;
-		context.stroke();
-		context.closePath();
-		
-		context.font = "20px Arial";
-		context.fillStyle = colour;
-		context.textAlign = "center";
-		context.fillText(title, radius + x + canvasMargin,
-			y + radius - k + canvasMargin - pointSize * 2);
+		drawPolePointAndTitle();
 	}
+	//#endregion
 	
+	//#region Western hemispere
 	if (0 <= longitude && longitude <= 180) {
-		// Western hemispere
 		context = western.context;
 		radius = western.radius - canvasMargin;
 		
@@ -444,25 +434,14 @@ function drawPoint(latitude, longitude, colour, title = '') {
 		x = t1 * longitude / 180 - h2;
 		y = t1 - t1 * (latitude + 90) / 180;
 		
-		context.beginPath();
-		context.arc(x + canvasMargin,
-			y + canvasMargin, pointSize, 0, 2 * Math.PI, false);
-		context.lineWidth = 1;
-		context.strokeStyle = colour;
-		context.stroke();
-		context.closePath();
-		
-		context.font = "20px Arial";
-		context.fillStyle = colour;
-		context.textAlign = "center";
-		context.fillText(title, x + canvasMargin,
-			y + canvasMargin - pointSize * 2);
+		drawPointAndTitle();
 	}
+	//#endregion
 	
 	if (longitude > 180) longitude -= 360;
 	
+	//#region Eastern hemispere
 	if (-180 <= longitude && longitude <= 0) {
-		// Eastern hemispere
 		context = eastern.context;
 		radius = eastern.radius - canvasMargin;
 		
@@ -476,6 +455,32 @@ function drawPoint(latitude, longitude, colour, title = '') {
 		x = t1 * (180 + longitude) / 180 + h2;
 		y = t1 - t1 * (latitude + 90) / 180;
 		
+		drawPointAndTitle();
+	}
+	//#endregion
+
+	function drawPolePointAndTitle() {
+		if (isNaN(x)) {
+			x = 0;
+			y = 0;
+		}
+	
+		context.beginPath();
+		context.arc(radius + x + canvasMargin,
+			y + radius - k + canvasMargin, pointSize, 0, 2 * Math.PI, false);
+		context.lineWidth = 1;
+		context.strokeStyle = colour;
+		context.stroke();
+		context.closePath();
+		
+		context.font = "20px Arial";
+		context.fillStyle = colour;
+		context.textAlign = "center";
+		context.fillText(title, radius + x + canvasMargin,
+			y + radius - k + canvasMargin - pointSize * 2);
+	}
+
+	function drawPointAndTitle() {
 		context.beginPath();
 		context.arc(x + canvasMargin,
 			y + canvasMargin, pointSize, 0, 2 * Math.PI, false);
@@ -520,13 +525,23 @@ function getCoordinates(map, mousePos) {
 		if (y > 0) longitude = longitude - 180;
 	}
 	
-	if (map == azimuthal) {
+	if (map == nothern_azimuthal) {
 		// Расстояние от центра до точки (широта)
 		latitude = 90 - Math.sqrt(x ** 2 + y ** 2) /
 			map.radius * 180;
 
 		// Угол (долгота)
 		longitude = 90 - Math.atan(x / -y) / Math.PI * 180;
+		if (y > 0) longitude = longitude - 180;
+	}
+	
+	if (map == southern_azimuthal) {
+		// Расстояние от центра до точки (широта)
+		latitude = -90 + Math.sqrt(x ** 2 + y ** 2) /
+			map.radius * 180;
+
+		// Угол (долгота)
+		longitude = 90 + Math.atan(x / -y) / Math.PI * 180;
 		if (y > 0) longitude = longitude - 180;
 	}
 	
