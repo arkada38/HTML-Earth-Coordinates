@@ -130,6 +130,106 @@ var drawHemisphereGrid = function(map) {
 	context.globalAlpha = 1;
 };
 
+var getCoordinates = function(map, mousePos) {
+	// Расстояние от центра по горизонтали
+	let x = mousePos.x * window.devicePixelRatio - map.radius + canvasMargin;
+	// Расстояние от центра по вертикали
+	let y = mousePos.y * window.devicePixelRatio - map.radius + canvasMargin;
+
+	let latitude, longitude;
+	
+	if (map == northern) {
+		// Расстояние от центра до точки (широта)
+		latitude = 90 - Math.sqrt(x ** 2 + y ** 2) /
+			map.radius * 90;
+
+		// Угол (долгота)
+		longitude = 90 - Math.atan(x / -y) / Math.PI * 180;
+		if (y > 0) longitude = longitude - 180;
+	}
+	
+	if (map == southern) {
+		// Расстояние от центра до точки (широта)
+		latitude = -90 + Math.sqrt(x ** 2 + y ** 2) /
+			map.radius * 90;
+
+		// Угол (долгота)
+		longitude = 90 + Math.atan(x / -y) / Math.PI * 180;
+		if (y > 0) longitude = longitude - 180;
+	}
+	
+	if (map == nothern_azimuthal) {
+		// Расстояние от центра до точки (широта)
+		latitude = 90 - Math.sqrt(x ** 2 + y ** 2) /
+			map.radius * 180;
+
+		// Угол (долгота)
+		longitude = 90 - Math.atan(x / -y) / Math.PI * 180;
+		if (y > 0) longitude = longitude - 180;
+	}
+	
+	if (map == southern_azimuthal) {
+		// Расстояние от центра до точки (широта)
+		latitude = -90 + Math.sqrt(x ** 2 + y ** 2) /
+			map.radius * 180;
+
+		// Угол (долгота)
+		longitude = 90 + Math.atan(x / -y) / Math.PI * 180;
+		if (y > 0) longitude = longitude - 180;
+	}
+	
+	if (map == western) {
+		// По вертикали (широта)
+		latitude = -90 * y / map.radius;
+
+		// По горизонтали (долгота)
+		// Поиск центра окружности по 3 точкам
+		// (через пересечение перпендикуляров)
+		// Коэффициент наклона первой прямой
+		let ma = (map.radius + y) / x;
+		// Коэффициент наклона второй прямой
+		let mb = -(map.radius - y) / x;
+		// Расстояние от центра полушария до радиуса
+		let rx = (ma * mb * (-2 * map.radius) + (mb - ma) * x) / 2 / (mb - ma);
+		// Радиус дуги долготы
+		let r = Math.sqrt(y ** 2 + (x - rx) ** 2);
+
+		let b = r - Math.abs(rx);
+		if ( x > 0) b = -b;
+
+		longitude = (1 - b / map.radius) * 90;
+	}
+	
+	if (map == eastern) {
+		// По вертикали (широта)
+		latitude = -90 * y / map.radius;
+
+		// По горизонтали (долгота)
+
+		// Поиск центра окружности по 3 точкам
+		// (через пересечение перпендикуляров)
+
+		// Коэффициент наклона первой прямой
+		let ma = (map.radius + y) / x;
+		// Коэффициент наклона второй прямой
+		let mb = -(map.radius - y) / x;
+		// Расстояние от центра полушария до радиуса
+		let rx = (ma * mb * (-2 * map.radius) + (mb - ma) * x) / 2 / (mb - ma);
+		// Радиус дуги долготы
+		let r = Math.sqrt(y ** 2 + (x - rx) ** 2);
+
+		let b = r - Math.abs(rx);
+		if ( x > 0) b = -b;
+
+		longitude = (-1 - b / map.radius) * 90;
+	}
+
+	return {
+		latitude: latitude,
+		longitude: longitude
+	};
+};
+
 var drawPoint = function(latitude, longitude, colour, title = '') {
 	let k, t, x, y;
 	/*
@@ -274,102 +374,38 @@ var drawPoint = function(latitude, longitude, colour, title = '') {
 	}
 };
 
-var getCoordinates = function(map, mousePos) {
-	// Расстояние от центра по горизонтали
-	let x = mousePos.x * window.devicePixelRatio - map.radius + canvasMargin;
-	// Расстояние от центра по вертикали
-	let y = mousePos.y * window.devicePixelRatio - map.radius + canvasMargin;
+var drawArea = function(points, fillColour, strokeColour = 'rgba(0,0,0,.5)') {
+    //#region Nothern azimuthal equidistant
+    context = nothern_azimuthal.context;
+    radius = nothern_azimuthal.radius - canvasMargin;
+        
+    context.beginPath();
 
-	let latitude, longitude;
-	
-	if (map == northern) {
-		// Расстояние от центра до точки (широта)
-		latitude = 90 - Math.sqrt(x ** 2 + y ** 2) /
-			map.radius * 90;
+    for (let i = 0; i < points.length; i++) {
+        let k, t, x, y;
+        /*
+        k - расстояние от полюса к координате
+        t - хорда
+        */
+        
+        let latitude = Math.min(Math.max(-90, points[i][0]), 90);
+        let longitude = Math.min(Math.max(-180, points[i][1]), 180);
+        
+        if (longitude < -90) longitude += 360;
+        
+        k = radius * (90 - latitude) / 180;
+        t = 2 * k * Math.cos((longitude + 90) / 360 * Math.PI);
+        x = t * Math.sqrt(k ** 2 - t ** 2 / 4) / k;
+        y = Math.sqrt(t ** 2 - x ** 2);
+        
+        if (i === 0) context.moveTo(radius + x + canvasMargin, y + radius - k + canvasMargin);
+        else context.lineTo(radius + x + canvasMargin, y + radius - k + canvasMargin);
+    }
 
-		// Угол (долгота)
-		longitude = 90 - Math.atan(x / -y) / Math.PI * 180;
-		if (y > 0) longitude = longitude - 180;
-	}
-	
-	if (map == southern) {
-		// Расстояние от центра до точки (широта)
-		latitude = -90 + Math.sqrt(x ** 2 + y ** 2) /
-			map.radius * 90;
-
-		// Угол (долгота)
-		longitude = 90 + Math.atan(x / -y) / Math.PI * 180;
-		if (y > 0) longitude = longitude - 180;
-	}
-	
-	if (map == nothern_azimuthal) {
-		// Расстояние от центра до точки (широта)
-		latitude = 90 - Math.sqrt(x ** 2 + y ** 2) /
-			map.radius * 180;
-
-		// Угол (долгота)
-		longitude = 90 - Math.atan(x / -y) / Math.PI * 180;
-		if (y > 0) longitude = longitude - 180;
-	}
-	
-	if (map == southern_azimuthal) {
-		// Расстояние от центра до точки (широта)
-		latitude = -90 + Math.sqrt(x ** 2 + y ** 2) /
-			map.radius * 180;
-
-		// Угол (долгота)
-		longitude = 90 + Math.atan(x / -y) / Math.PI * 180;
-		if (y > 0) longitude = longitude - 180;
-	}
-	
-	if (map == western) {
-		// По вертикали (широта)
-		latitude = -90 * y / map.radius;
-
-		// По горизонтали (долгота)
-		// Поиск центра окружности по 3 точкам
-		// (через пересечение перпендикуляров)
-		// Коэффициент наклона первой прямой
-		let ma = (map.radius + y) / x;
-		// Коэффициент наклона второй прямой
-		let mb = -(map.radius - y) / x;
-		// Расстояние от центра полушария до радиуса
-		let rx = (ma * mb * (-2 * map.radius) + (mb - ma) * x) / 2 / (mb - ma);
-		// Радиус дуги долготы
-		let r = Math.sqrt(y ** 2 + (x - rx) ** 2);
-
-		let b = r - Math.abs(rx);
-		if ( x > 0) b = -b;
-
-		longitude = (1 - b / map.radius) * 90;
-	}
-	
-	if (map == eastern) {
-		// По вертикали (широта)
-		latitude = -90 * y / map.radius;
-
-		// По горизонтали (долгота)
-
-		// Поиск центра окружности по 3 точкам
-		// (через пересечение перпендикуляров)
-
-		// Коэффициент наклона первой прямой
-		let ma = (map.radius + y) / x;
-		// Коэффициент наклона второй прямой
-		let mb = -(map.radius - y) / x;
-		// Расстояние от центра полушария до радиуса
-		let rx = (ma * mb * (-2 * map.radius) + (mb - ma) * x) / 2 / (mb - ma);
-		// Радиус дуги долготы
-		let r = Math.sqrt(y ** 2 + (x - rx) ** 2);
-
-		let b = r - Math.abs(rx);
-		if ( x > 0) b = -b;
-
-		longitude = (-1 - b / map.radius) * 90;
-	}
-
-	return {
-		latitude: latitude,
-		longitude: longitude
-	};
+    context.closePath();
+    context.fillStyle = fillColour;
+    context.fill();
+    context.strokeStyle = strokeColour;
+    context.stroke();
+    //#endregion
 };
