@@ -1,11 +1,11 @@
 'use strict';
 
-var drawPoleGrid = function(map) {
+let drawPoleGrid = function (map) {
 	let context = map.context;
 	let radius = map.radius - canvasMargin;
 	let steps = map.steps;
 
-	context.globalAlpha = .5;
+	context.globalAlpha = .3;
 
 	// Latitudes (окружности)
 	for (let i = 1; i <= steps; i++) {
@@ -54,16 +54,16 @@ var drawPoleGrid = function(map) {
 	context.moveTo(radius * (steps - 1) / steps + canvasMargin, radius + canvasMargin);
 	context.lineTo(radius * (steps + 1) / steps + canvasMargin, radius + canvasMargin);
 	context.stroke();
-	
-	context.globalAlpha = 1;
-};
 
-var drawHemisphereGrid = function(map) {
+	context.globalAlpha = 1;
+}
+
+let drawHemisphereGrid = function (map) {
 	let context = map.context;
 	let radius = map.radius - canvasMargin;
 	let steps = map.steps;
 
-	context.globalAlpha = .5;
+	context.globalAlpha = .3;
 	context.beginPath();
 
 	// Окружность сферы
@@ -128,16 +128,16 @@ var drawHemisphereGrid = function(map) {
 	}
 
 	context.globalAlpha = 1;
-};
+}
 
-var getCoordinates = function(map, mousePos) {
+let getCoordinates = function (map, mousePos) {
 	// Расстояние от центра по горизонтали
 	let x = mousePos.x * window.devicePixelRatio - map.radius + canvasMargin;
 	// Расстояние от центра по вертикали
 	let y = mousePos.y * window.devicePixelRatio - map.radius + canvasMargin;
 
 	let latitude, longitude;
-	
+
 	if (map == northern) {
 		// Расстояние от центра до точки (широта)
 		latitude = 90 - Math.sqrt(x ** 2 + y ** 2) /
@@ -147,7 +147,7 @@ var getCoordinates = function(map, mousePos) {
 		longitude = 90 - Math.atan(x / -y) / Math.PI * 180;
 		if (y > 0) longitude = longitude - 180;
 	}
-	
+
 	if (map == southern) {
 		// Расстояние от центра до точки (широта)
 		latitude = -90 + Math.sqrt(x ** 2 + y ** 2) /
@@ -157,7 +157,7 @@ var getCoordinates = function(map, mousePos) {
 		longitude = 90 + Math.atan(x / -y) / Math.PI * 180;
 		if (y > 0) longitude = longitude - 180;
 	}
-	
+
 	if (map == nothern_azimuthal) {
 		// Расстояние от центра до точки (широта)
 		latitude = 90 - Math.sqrt(x ** 2 + y ** 2) /
@@ -167,7 +167,7 @@ var getCoordinates = function(map, mousePos) {
 		longitude = 90 - Math.atan(x / -y) / Math.PI * 180;
 		if (y > 0) longitude = longitude - 180;
 	}
-	
+
 	if (map == southern_azimuthal) {
 		// Расстояние от центра до точки (широта)
 		latitude = -90 + Math.sqrt(x ** 2 + y ** 2) /
@@ -177,7 +177,7 @@ var getCoordinates = function(map, mousePos) {
 		longitude = 90 + Math.atan(x / -y) / Math.PI * 180;
 		if (y > 0) longitude = longitude - 180;
 	}
-	
+
 	if (map == western) {
 		// По вертикали (широта)
 		latitude = -90 * y / map.radius;
@@ -195,11 +195,11 @@ var getCoordinates = function(map, mousePos) {
 		let r = Math.sqrt(y ** 2 + (x - rx) ** 2);
 
 		let b = r - Math.abs(rx);
-		if ( x > 0) b = -b;
+		if (x > 0) b = -b;
 
 		longitude = (1 - b / map.radius) * 90;
 	}
-	
+
 	if (map == eastern) {
 		// По вертикали (широта)
 		latitude = -90 * y / map.radius;
@@ -219,7 +219,7 @@ var getCoordinates = function(map, mousePos) {
 		let r = Math.sqrt(y ** 2 + (x - rx) ** 2);
 
 		let b = r - Math.abs(rx);
-		if ( x > 0) b = -b;
+		if (x > 0) b = -b;
 
 		longitude = (-1 - b / map.radius) * 90;
 	}
@@ -227,10 +227,10 @@ var getCoordinates = function(map, mousePos) {
 	return {
 		latitude: latitude,
 		longitude: longitude
-	};
-};
+	}
+}
 
-var drawPoint = function(latitude, longitude, colour, title = '') {
+let drawPoint = function (latitude, longitude, color, title = '') {
 	let k, t, x, y;
 	/*
 	k - расстояние от полюса к координате
@@ -238,50 +238,50 @@ var drawPoint = function(latitude, longitude, colour, title = '') {
 	*/
 
 	let pointSize = 3 * window.devicePixelRatio;
-	
+
 	latitude = Math.min(Math.max(-90, latitude), 90);
 	longitude = Math.min(Math.max(-180, longitude), 180);
-	
+
 	if (longitude < -90) longitude += 360;
-	
+
 	//#region Nothern azimuthal equidistant
 	context = nothern_azimuthal.context;
 	radius = nothern_azimuthal.radius - canvasMargin;
-	
-    k = radius * (90 - latitude) / 180;
+
+	k = radius * (90 - latitude) / 180;
 	t = 2 * k * Math.cos((longitude + 90) / 360 * Math.PI);
 	x = t * Math.sqrt(k ** 2 - t ** 2 / 4) / k;
 	y = Math.sqrt(t ** 2 - x ** 2);
-	
+
 	drawPolePointAndTitle();
 	//#endregion
-	
+
 	//#region Southern azimuthal equidistant
 	context = southern_azimuthal.context;
 	radius = southern_azimuthal.radius - canvasMargin;
-	
-    k = radius * (90 + latitude) / 180;
+
+	k = radius * (90 + latitude) / 180;
 	t = 2 * k * Math.sin((longitude - 90) / 360 * Math.PI);
 	x = t * Math.sqrt(k ** 2 - t ** 2 / 4) / k;
 	y = Math.sqrt(t ** 2 - x ** 2);
-	
+
 	drawPolePointAndTitle();
 	//#endregion
-	
+
 	//#region Northern hemisphere
 	if (0 <= latitude && latitude <= 90) {
 		context = northern.context;
 		radius = northern.radius - canvasMargin;
-		
+
 		k = radius * (1 - (latitude / 90));
 		t = 2 * k * Math.cos((longitude + 90) / 360 * Math.PI);
 		x = t * Math.sqrt(k ** 2 - t ** 2 / 4) / k;
 		y = Math.sqrt(t ** 2 - x ** 2);
-	
+
 		drawPolePointAndTitle();
 	}
 	//#endregion
-	
+
 	//#region Southern hemisphere
 	if (-90 <= latitude && latitude <= 0) {
 		context = southern.context;
@@ -291,47 +291,47 @@ var drawPoint = function(latitude, longitude, colour, title = '') {
 		t = 2 * k * Math.sin((longitude - 90) / 360 * Math.PI);
 		x = t * Math.sqrt(k ** 2 - t ** 2 / 4) / k;
 		y = Math.sqrt(t ** 2 - x ** 2);
-	
+
 		drawPolePointAndTitle();
 	}
 	//#endregion
-	
+
 	//#region Western hemispere
 	if (0 <= longitude && longitude <= 180) {
 		context = western.context;
 		radius = western.radius - canvasMargin;
-		
+
 		let t1 = 2 * radius;
 		let h1 = radius * Math.abs(longitude - 90) / 90;
 		let r = h1 / 2 + t1 ** 2 / 8 / h1;
 		let t2 = t1 * Math.abs(latitude) / 90;
-		let h2 = r - Math.sqrt(r ** 2  - t2 ** 2 / 4);
+		let h2 = r - Math.sqrt(r ** 2 - t2 ** 2 / 4);
 		if (longitude < 90) h2 = -h2;
-		
+
 		x = t1 * longitude / 180 - h2;
 		y = t1 - t1 * (latitude + 90) / 180;
-		
+
 		drawPointAndTitle();
 	}
 	//#endregion
-	
+
 	if (longitude > 180) longitude -= 360;
-	
+
 	//#region Eastern hemispere
 	if (-180 <= longitude && longitude <= 0) {
 		context = eastern.context;
 		radius = eastern.radius - canvasMargin;
-		
+
 		let t1 = 2 * radius;
 		let h1 = radius * Math.abs(longitude + 90) / 90;
 		let r = h1 / 2 + t1 ** 2 / 8 / h1;
 		let t2 = t1 * Math.abs(latitude) / 90;
-		let h2 = r - Math.sqrt(r ** 2  - t2 ** 2 / 4);
+		let h2 = r - Math.sqrt(r ** 2 - t2 ** 2 / 4);
 		if (longitude > -90) h2 = -h2;
-		
+
 		x = t1 * (180 + longitude) / 180 + h2;
 		y = t1 - t1 * (latitude + 90) / 180;
-		
+
 		drawPointAndTitle();
 	}
 	//#endregion
@@ -341,17 +341,17 @@ var drawPoint = function(latitude, longitude, colour, title = '') {
 			x = 0;
 			y = 0;
 		}
-	
+
 		context.beginPath();
 		context.arc(radius + x + canvasMargin,
 			y + radius - k + canvasMargin, pointSize, 0, 2 * Math.PI, false);
 		context.lineWidth = 1;
-		context.strokeStyle = colour;
+		context.strokeStyle = color;
 		context.stroke();
 		context.closePath();
-		
+
 		context.font = "20px Arial";
-		context.fillStyle = colour;
+		context.fillStyle = color;
 		context.textAlign = "center";
 		context.fillText(title, radius + x + canvasMargin,
 			y + radius - k + canvasMargin - pointSize * 2);
@@ -362,50 +362,50 @@ var drawPoint = function(latitude, longitude, colour, title = '') {
 		context.arc(x + canvasMargin,
 			y + canvasMargin, pointSize, 0, 2 * Math.PI, false);
 		context.lineWidth = 1;
-		context.strokeStyle = colour;
+		context.strokeStyle = color;
 		context.stroke();
 		context.closePath();
-		
+
 		context.font = "20px Arial";
-		context.fillStyle = colour;
+		context.fillStyle = color;
 		context.textAlign = "center";
 		context.fillText(title, x + canvasMargin,
 			y + canvasMargin - pointSize * 2);
 	}
-};
+}
 
-var drawArea = function(points, fillColour, strokeColour = 'rgba(0,0,0,.5)') {
-    //#region Nothern azimuthal equidistant
-    context = nothern_azimuthal.context;
-    radius = nothern_azimuthal.radius - canvasMargin;
-        
-    context.beginPath();
+let drawArea = function (points, fillColor, strokeColor = 'rgba(0,0,0,.5)') {
+	//#region Nothern azimuthal equidistant
+	context = nothern_azimuthal.context
+	radius = nothern_azimuthal.radius - canvasMargin
 
-    for (let i = 0; i < points.length; i++) {
-        let k, t, x, y;
-        /*
-        k - расстояние от полюса к координате
-        t - хорда
-        */
-        
-        let latitude = Math.min(Math.max(-90, points[i][0]), 90);
-        let longitude = Math.min(Math.max(-180, points[i][1]), 180);
-        
-        if (longitude < -90) longitude += 360;
-        
-        k = radius * (90 - latitude) / 180;
-        t = 2 * k * Math.cos((longitude + 90) / 360 * Math.PI);
-        x = t * Math.sqrt(k ** 2 - t ** 2 / 4) / k;
-        y = Math.sqrt(t ** 2 - x ** 2);
-        
-        if (i === 0) context.moveTo(radius + x + canvasMargin, y + radius - k + canvasMargin);
-        else context.lineTo(radius + x + canvasMargin, y + radius - k + canvasMargin);
-    }
+	context.beginPath()
 
-    context.closePath();
-    context.fillStyle = fillColour;
-    context.fill();
-    context.strokeStyle = strokeColour;
-    context.stroke();
-    //#endregion
-};
+	for (let i = 0; i < points.length; i++) {
+		let k, t, x, y
+		/*
+		k - расстояние от полюса к координате
+		t - хорда
+		*/
+
+		let latitude = Math.min(Math.max(-90, points[i][0]), 90)
+		let longitude = Math.min(Math.max(-180, points[i][1]), 180)
+
+		if (longitude < -90) longitude += 360
+
+		k = radius * (90 - latitude) / 180
+		t = 2 * k * Math.cos((longitude + 90) / 360 * Math.PI)
+		x = t * Math.sqrt(k ** 2 - t ** 2 / 4) / k
+		y = Math.sqrt(t ** 2 - x ** 2)
+
+		if (i === 0) context.moveTo(radius + x + canvasMargin, y + radius - k + canvasMargin)
+		else context.lineTo(radius + x + canvasMargin, y + radius - k + canvasMargin)
+	}
+
+	context.closePath()
+	context.fillStyle = fillColor
+	context.fill()
+	context.strokeStyle = strokeColor
+	context.stroke()
+	//#endregion
+}

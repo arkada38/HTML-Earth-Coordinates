@@ -3,24 +3,26 @@
 //Longitude is a geographic coordinate that specifies the east-west position of a point on the Earth's surface.
 //Latitude is a geographic coordinate that specifies the north–south position of a point on the Earth's surface.
 
-var side, canvas, context, mouseX, mouseY, radius, canvasMargin;
+let side, canvas, context, mouseX, mouseY, radius, canvasMargin, points;
 
 let nothern_azimuthal, southern_azimuthal, northern, southern, western, eastern;
 
-window.onload = function() {
-	let size = window.innerWidth * 0.33 - 44;
-	size *= window.devicePixelRatio;
-	canvasMargin = 2;
+window.onload = function () {
+	let size = window.innerWidth * 0.33 - 28
+	size *= window.devicePixelRatio
+	canvasMargin = 2
 
-	initHemispheres(size);
+	initPoints()
 
-    addMouseMoveListener();
+	initHemispheres(size)
 
-	draw();
-};
+	addMouseMoveListener()
 
-window.onresize = function(event) {
-	var size = Math.round(window.innerWidth * 0.33 - 44);
+	draw()
+}
+
+window.onresize = function (event) {
+	let size = Math.round(window.innerWidth * 0.33 - 28);
 	let styleSize = size + 'px';
 	size *= window.devicePixelRatio;
 
@@ -37,7 +39,7 @@ window.onresize = function(event) {
 	southern.radius = southern.side / 2 - canvasMargin;
 	western.radius = western.side / 2 - canvasMargin;
 	eastern.radius = eastern.side / 2 - canvasMargin;
-	
+
 	nothern_azimuthal.canvas.style.width = styleSize;
 	southern_azimuthal.canvas.style.width = styleSize;
 	northern.canvas.style.width = styleSize;
@@ -52,13 +54,54 @@ window.onresize = function(event) {
 	western.canvas.style.height = styleSize;
 	eastern.canvas.style.height = styleSize;
 
-    draw();
-};
+	draw();
+}
 
-var initHemispheres = function(size) {
+let addPoint = function (latitude, longitude, color, title = '') {
+	points.push({
+		latitude,
+		longitude,
+		color,
+		title
+	})
+}
+
+let initPoints = function () {
+	points = []
+
+	addPoint(55.7498598, 37.352323, 'green', 'Moscow')
+	addPoint(54.9700936, 82.8093239, 'blue', 'Novosibirsk')
+	addPoint(43.1738098, 131.9657976, 'blue', 'Vladivostok')
+	addPoint(39.9390731, 116.1172797, 'green', 'Beijing')
+
+	addPoint(52.5069704, 13.2846504, 'red', 'Berlin')
+	addPoint(51.528308, -0.3817765, 'blue', 'London')
+
+	addPoint(34.0207305, -118.6919138, 'green', 'Los Angeles')
+	addPoint(40.6976637, -74.1197636, 'green', 'New York')
+
+	addPoint(7.883403, 98.374404, 'green', 'Phuket')
+
+	addPoint(-37.9716929, 144.7729595, 'red', 'Melbourne')
+	addPoint(-33.8478796, 150.7918925, 'green', 'Sydney')
+	addPoint(-32.0391738, 115.6813572, 'green', 'Perth')
+	addPoint(-12.425724, 130.8632685, 'green', 'Darwin')
+	addPoint(-27.3812534, 152.7130162, 'green', 'Brisbane')
+	addPoint(-34.9998826, 138.3309827, 'green', 'Adelaide')
+	addPoint(-41.2442198, 174.6918153, 'gold', 'Wellington')
+
+	addPoint(-54.6239778, -65.2356668, 'blue', 'Bahía Thetis')
+	addPoint(-34.6156625, -58.5033379, 'blue', 'Buenos Aires')
+	addPoint(-23.6815315, -46.8754808, 'blue', 'São Paulo')
+	addPoint(-33.4724228, -70.7699136, 'blue', 'Santiago de Chile')
+
+	addPoint(35.6693863, 139.6012976, 'blue', 'Tokyo')
+}
+
+let initHemispheres = function (size) {
 	let styleSize = Math.round(size / window.devicePixelRatio) + 'px';
 
-    nothern_azimuthal = {
+	nothern_azimuthal = {
 		canvas: document.getElementById('cv_nothern_azimuthal'),
 		context: document.getElementById('cv_nothern_azimuthal').getContext('2d'),
 		side: size,
@@ -68,7 +111,7 @@ var initHemispheres = function(size) {
 	nothern_azimuthal.canvas.style.width = styleSize;
 	nothern_azimuthal.canvas.style.height = styleSize;
 
-    southern_azimuthal = {
+	southern_azimuthal = {
 		canvas: document.getElementById('cv_southern_azimuthal'),
 		context: document.getElementById('cv_southern_azimuthal').getContext('2d'),
 		side: size,
@@ -77,7 +120,7 @@ var initHemispheres = function(size) {
 	};
 	southern_azimuthal.canvas.style.width = styleSize;
 	southern_azimuthal.canvas.style.height = styleSize;
-	
+
 	northern = {
 		canvas: document.getElementById('cv_north'),
 		context: document.getElementById('cv_north').getContext('2d'),
@@ -87,7 +130,7 @@ var initHemispheres = function(size) {
 	};
 	northern.canvas.style.width = styleSize;
 	northern.canvas.style.height = styleSize;
-	
+
 	southern = {
 		canvas: document.getElementById('cv_south'),
 		context: document.getElementById('cv_south').getContext('2d'),
@@ -97,73 +140,115 @@ var initHemispheres = function(size) {
 	};
 	southern.canvas.style.width = styleSize;
 	southern.canvas.style.height = styleSize;
-	
+
 	western = {
 		canvas: document.getElementById('cv_west'),
 		context: document.getElementById('cv_west').getContext('2d'),
 		side: size,
 		radius: size / 2 - canvasMargin,
-		steps: 12
+		steps: 18
 	};
 	western.canvas.style.width = styleSize;
 	western.canvas.style.height = styleSize;
-	
+
 	eastern = {
 		canvas: document.getElementById('cv_east'),
 		context: document.getElementById('cv_east').getContext('2d'),
 		side: size,
 		radius: size / 2 - canvasMargin,
-		steps: 12
+		steps: 18
 	};
 	eastern.canvas.style.width = styleSize;
 	eastern.canvas.style.height = styleSize;
-};
+}
 
-var addMouseMoveListener = function() {
-    nothern_azimuthal.canvas.addEventListener('mousemove', function(evt) {
-		let mousePos = getMousePos(nothern_azimuthal.canvas, evt);
-		let coordinates = getCoordinates(nothern_azimuthal, mousePos);
-		draw();
-		drawPoint(coordinates.latitude, coordinates.longitude, "black");
-	}, false);
+let addMouseMoveListener = function () {
+	nothern_azimuthal.canvas.addEventListener('mousemove', function (evt) {
+		let mousePos = getMousePos(nothern_azimuthal.canvas, evt)
+		let coordinates = getCoordinates(nothern_azimuthal, mousePos)
+		draw()
+		drawPoint(coordinates.latitude, coordinates.longitude, "black")
+	}, false)
 
-    southern_azimuthal.canvas.addEventListener('mousemove', function(evt) {
-		let mousePos = getMousePos(southern_azimuthal.canvas, evt);
-		let coordinates = getCoordinates(southern_azimuthal, mousePos);
-		draw();
-		drawPoint(coordinates.latitude, coordinates.longitude, "black");
-	}, false);
+	nothern_azimuthal.canvas.addEventListener('click', function (evt) {
+		let mousePos = getMousePos(nothern_azimuthal.canvas, evt)
+		let coordinates = getCoordinates(nothern_azimuthal, mousePos)
+		addPoint(coordinates.latitude, coordinates.longitude, "purple")
+		draw()
+	}, false)
 
-	northern.canvas.addEventListener('mousemove', function(evt) {
-		let mousePos = getMousePos(northern.canvas, evt);
-		let coordinates = getCoordinates(northern, mousePos);
-		draw();
-		drawPoint(coordinates.latitude, coordinates.longitude, "black");
-	}, false);
-	
-	southern.canvas.addEventListener('mousemove', function(evt) {
-		let mousePos = getMousePos(southern.canvas, evt);
-		let coordinates = getCoordinates(southern, mousePos);
-		draw();
-		drawPoint(coordinates.latitude, coordinates.longitude, "black");
-	}, false);
-	
-	western.canvas.addEventListener('mousemove', function(evt) {
-		let mousePos = getMousePos(western.canvas, evt);
-		let coordinates = getCoordinates(western, mousePos);
-		draw();
-		drawPoint(coordinates.latitude, coordinates.longitude, "black");
-	}, false);
-	
-	eastern.canvas.addEventListener('mousemove', function(evt) {
-		let mousePos = getMousePos(eastern.canvas, evt);
-		let coordinates = getCoordinates(eastern, mousePos);
-		draw();
-		drawPoint(coordinates.latitude, coordinates.longitude, "black");
-	}, false);
-};
+	southern_azimuthal.canvas.addEventListener('mousemove', function (evt) {
+		let mousePos = getMousePos(southern_azimuthal.canvas, evt)
+		let coordinates = getCoordinates(southern_azimuthal, mousePos)
+		draw()
+		drawPoint(coordinates.latitude, coordinates.longitude, "black")
+	}, false)
 
-var draw = function() {
+	southern_azimuthal.canvas.addEventListener('click', function (evt) {
+		let mousePos = getMousePos(southern_azimuthal.canvas, evt)
+		let coordinates = getCoordinates(southern_azimuthal, mousePos)
+		addPoint(coordinates.latitude, coordinates.longitude, "purple")
+		draw()
+	}, false)
+
+	northern.canvas.addEventListener('mousemove', function (evt) {
+		let mousePos = getMousePos(northern.canvas, evt)
+		let coordinates = getCoordinates(northern, mousePos)
+		draw()
+		drawPoint(coordinates.latitude, coordinates.longitude, "black")
+	}, false)
+
+	northern.canvas.addEventListener('click', function (evt) {
+		let mousePos = getMousePos(northern.canvas, evt)
+		let coordinates = getCoordinates(northern, mousePos)
+		addPoint(coordinates.latitude, coordinates.longitude, "purple")
+		draw()
+	}, false)
+
+	southern.canvas.addEventListener('mousemove', function (evt) {
+		let mousePos = getMousePos(southern.canvas, evt)
+		let coordinates = getCoordinates(southern, mousePos)
+		draw()
+		drawPoint(coordinates.latitude, coordinates.longitude, "black")
+	}, false)
+
+	southern.canvas.addEventListener('click', function (evt) {
+		let mousePos = getMousePos(southern.canvas, evt)
+		let coordinates = getCoordinates(southern, mousePos)
+		addPoint(coordinates.latitude, coordinates.longitude, "purple")
+		draw()
+	}, false)
+
+	western.canvas.addEventListener('mousemove', function (evt) {
+		let mousePos = getMousePos(western.canvas, evt)
+		let coordinates = getCoordinates(western, mousePos)
+		draw()
+		drawPoint(coordinates.latitude, coordinates.longitude, "black")
+	}, false)
+
+	western.canvas.addEventListener('click', function (evt) {
+		let mousePos = getMousePos(western.canvas, evt)
+		let coordinates = getCoordinates(western, mousePos)
+		addPoint(coordinates.latitude, coordinates.longitude, "purple")
+		draw()
+	}, false)
+
+	eastern.canvas.addEventListener('mousemove', function (evt) {
+		let mousePos = getMousePos(eastern.canvas, evt)
+		let coordinates = getCoordinates(eastern, mousePos)
+		draw()
+		drawPoint(coordinates.latitude, coordinates.longitude, "black")
+	}, false)
+
+	eastern.canvas.addEventListener('click', function (evt) {
+		let mousePos = getMousePos(eastern.canvas, evt)
+		let coordinates = getCoordinates(eastern, mousePos)
+		addPoint(coordinates.latitude, coordinates.longitude, "purple")
+		draw()
+	}, false)
+}
+
+let draw = function () {
 	nothern_azimuthal.context.canvas.width = nothern_azimuthal.side;
 	nothern_azimuthal.context.canvas.height = nothern_azimuthal.side;
 
@@ -194,34 +279,10 @@ var draw = function() {
 	drawHemisphereGrid(western);
 	// Eastern hemisphere
 	drawHemisphereGrid(eastern);
-	
-	drawPoint(55.7498598,37.352323, 'green', 'Moscow');
-	drawPoint(54.9700936,82.8093239, 'blue', 'Novosibirsk');
-	drawPoint(43.1738098,131.9657976, 'blue', 'Vladivostok');
-	drawPoint(39.9390731, 116.1172797, 'green', 'Beijing');
 
-	drawPoint(52.5069704,13.2846504, 'red', 'Berlin');
-	drawPoint(51.528308,-0.3817765, 'blue', 'London');
-
-	drawPoint(34.0207305, -118.6919138, 'green', 'Los Angeles');
-	drawPoint(40.6976637,-74.1197636, 'green', 'New York');
-
-	drawPoint(7.883403,98.374404, 'green', 'Phuket');
-
-	drawPoint(-37.9716929,144.7729595, 'red', 'Melbourne');
-	drawPoint(-33.8478796,150.7918925, 'green', 'Sydney');
-	drawPoint(-32.0391738,115.6813572, 'green', 'Perth');
-	drawPoint(-12.425724,130.8632685, 'green', 'Darwin');
-	drawPoint(-27.3812534,152.7130162, 'green', 'Brisbane');
-	drawPoint(-34.9998826,138.3309827, 'green', 'Adelaide');
-	drawPoint(-41.2442198,174.6918153, 'gold', 'Wellington');
-
-	drawPoint(-54.6239778,-65.2356668, 'blue', 'Bahía Thetis');
-	drawPoint(-34.6156625,-58.5033379, 'blue', 'Buenos Aires');
-	drawPoint(-23.6815315,-46.8754808, 'blue', 'São Paulo');
-	drawPoint(-33.4724228,-70.7699136, 'blue', 'Santiago de Chile');
-
-	drawPoint(35.6693863,139.6012976, 'blue', 'Tokyo');
+	points.forEach(point => {
+		drawPoint(point.latitude, point.longitude, point.color, point.title)
+	})
 	//drawPoint(60, +20, 'blue', '');
 
 	let australia = [
@@ -245,12 +306,12 @@ var draw = function() {
 		[-34.890339, 117.315896]
 	];
 	drawArea(australia, 'rgba(254,203,212,0.3)');
-};
+}
 
-var getMousePos = function(canvas, evt) {
-    var rect = canvas.getBoundingClientRect();
-    return {
+let getMousePos = function (canvas, evt) {
+	let rect = canvas.getBoundingClientRect()
+	return {
 		x: evt.clientX - rect.left,
 		y: evt.clientY - rect.top
-    };
-};
+	}
+}
